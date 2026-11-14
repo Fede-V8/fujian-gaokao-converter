@@ -1,11 +1,16 @@
 # 模考 → 高考 换算器
 
-把模考位次按「宁德市上线率比全省低 5~7 个百分点」换算成全省等效位次和高考等效分。
-同一个算法有两个入口：**网页版**（`docs/`，可直接部署到 GitHub Pages）和 **命令行版**（`score_converter.py`）。
+把模考位次按「宁德市上线率比全省低 5~7 个百分点」换算成全省等效位次和高考等效分，
+并对照近三年院校专业组投档线给出「能冲 / 能稳」名单。
+
+**在线使用**：https://fede-v8.github.io/fujian-gaokao-converter/
+**数据**：2026 官方 217 组 / 2025 128 组 / 2024 109 组（福建省教育考试院公开公告）
+
+同一个算法有两个入口：**网页版**（`docs/`，已部署到 GitHub Pages）和 **命令行版**（`score_converter.py`）。
 
 ```
 docs/                       ← 静态网页，无构建步骤，直接丢到 GitHub Pages 就能跑
-├── index.html              ← 按顺序加载 4 个普通 <script>
+├── index.html              ← 按顺序加载 5 个普通 <script>（core/admissions/chart/export/ui）
 ├── standalone.html         ← 生成物：CSS/JS 全内联，单个文件也能跑
 ├── styles.css              ← 手机版式 + 深浅色主题变量
 ├── .nojekyll               ← GitHub Pages 用
@@ -199,6 +204,21 @@ git push -u origin main
 - **模考 15,000 人是否等于全市物理类考生**——如果只有部分学校参考，市内百分位会失真。
 - **5~7 个百分点是整段结论里最大的不确定源**：每动 1 个百分点，等效分动约 3 分。
 - 位次是主结果（稳），分数是派生结果（估）。结果仅供定位参考，不能替代志愿填报决策。
+
+## 持续集成
+
+`.github/workflows/tests.yml` 会在每次 push 时跑：36 个 Python 测试 → 58 项数值对拍 →
+34 项界面冒烟 → 单文件版重建冒烟。
+
+> 首次推送用的 OAuth token 只有 `repo` 权限、没有 `workflow`，所以这个文件暂时没提交。
+> 想启用：在 GitHub 网页上打开 Actions → 新建 workflow，把仓库里 `docs/../.github/workflows/tests.yml`
+> 的内容粘进去即可（或本地 `gh auth refresh -s workflow` 后重新提交）。
+
+## 数据来源与免责
+
+- 切线、一分一段、院校专业组投档线均来自 **福建省教育考试院公开公告**；位次由官方一分一段表按分数换算。
+- 换算结果为**统计估算**，仅供参考，不构成志愿填报建议；以省考试院与高校公布的数据为准。
+- 代码 MIT；数据本身版权归原发布机构。
 
 ## 许可
 
