@@ -1,0 +1,2423 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>模考 → 高考 换算器 · 宁德物理类</title>
+<meta name="description" content="按宁德市上线率（比全省低 5~7 个百分点）把模考成绩换算成全省等效位次和高考等效分。支持多人对比、快速换算表、一键存长图。" />
+<meta name="theme-color" content="#f4f6fb" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233b6ef5'/%3E%3Ctext x='16' y='23' font-size='19' fill='white' text-anchor='middle' font-family='sans-serif'%3E∑%3C/text%3E%3C/svg%3E" />
+<style>
+:root {
+  --bg: #f2f4f9;
+  --card: #ffffff;
+  --ink: #12151c;
+  --ink-2: #3c4353;
+  --muted: #6b7280;
+  --dim: #9aa0b0;
+  --line: #e7e9f1;
+  --line-soft: #f1f2f7;
+  --accent: #3b6ef5;
+  --accent-soft: #e9efff;
+  --green: #0f9d58;
+  --green-soft: #e6f6ee;
+  --red: #e5484d;
+  --red-soft: #fdeceb;
+  --amber: #b57500;
+  --amber-soft: #fff4de;
+  --shadow: 0 1px 2px rgba(18, 24, 40, 0.04), 0 8px 24px rgba(18, 24, 40, 0.05);
+  --radius: 18px;
+}
+
+html[data-theme='dark'] {
+  --bg: #0e1116;
+  --card: #161a22;
+  --ink: #e9ecf3;
+  --ink-2: #c2c8d6;
+  --muted: #939bad;
+  --dim: #6f7789;
+  --line: #242a36;
+  --line-soft: #1c222c;
+  --accent: #6b93ff;
+  --accent-soft: #18233f;
+  --green: #3ddc97;
+  --green-soft: #12291f;
+  --red: #ff6b6b;
+  --red-soft: #2b1618;
+  --amber: #f0b429;
+  --amber-soft: #2a2113;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body { max-width: 100%; overflow-x: hidden; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.6 -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB',
+        'Microsoft YaHei', 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.wrap { width: min(680px, 100% - 24px); margin-inline: auto; }
+
+/* ---------- 顶栏 ---------- */
+.top {
+  position: sticky; top: 0; z-index: 20;
+  padding-top: env(safe-area-inset-top);
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+.top-inner {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 0;
+}
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.logo {
+  width: 36px; height: 36px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 11px;
+  background: var(--accent); color: #fff;
+  font-size: 19px; font-weight: 600;
+}
+.brand-txt { min-width: 0; }
+.top h1 {
+  margin: 0; font-size: 15.5px; font-weight: 650; letter-spacing: -0.01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.top p { margin: 0; font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.icon-btn {
+  flex: none;
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  border-radius: 11px; cursor: pointer;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink-2);
+  font-size: 16px;
+}
+.icon-btn:active { transform: scale(0.96); }
+
+/* ---------- 布局 ---------- */
+main.wrap { display: grid; gap: 12px; padding: 12px 0 4px; }
+
+.card {
+  min-width: 0;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.card-head { margin-bottom: 12px; }
+.card-head.row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.card h2 { margin: 0; font-size: 14.5px; font-weight: 650; }
+.card-sub { margin: 3px 0 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ---------- 表单 ---------- */
+.field { display: block; margin-bottom: 12px; min-width: 0; }
+.field .label, .field-label {
+  display: block; font-size: 12.5px; color: var(--muted); margin-bottom: 5px;
+}
+.field-label b { color: var(--accent); font-size: 14px; }
+
+.control {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--line-soft);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 0 11px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.control:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); background: var(--card); }
+.control input {
+  flex: 1; min-width: 0; width: 100%;
+  border: 0; background: transparent; outline: none;
+  color: var(--ink);
+  font: inherit; font-size: 17px; font-weight: 650;
+  padding: 9px 0;
+  font-variant-numeric: tabular-nums;
+}
+.control input::-webkit-outer-spin-button,
+.control input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.control input[type='number'] { -moz-appearance: textfield; appearance: textfield; }
+.control em { font-style: normal; font-size: 12px; color: var(--dim); }
+
+input[type='range'] {
+  width: 100%; margin: 4px 0 2px; height: 24px;
+  -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer;
+}
+input[type='range']::-webkit-slider-runnable-track {
+  height: 6px; border-radius: 99px;
+  background: linear-gradient(90deg, var(--accent) 0 var(--fill, 60%), var(--line) var(--fill, 60%) 100%);
+}
+input[type='range']::-moz-range-track { height: 6px; border-radius: 99px; background: var(--line); }
+input[type='range']::-moz-range-progress { height: 6px; border-radius: 99px; background: var(--accent); }
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 20px; height: 20px; margin-top: -7px;
+  border-radius: 50%; background: #fff;
+  border: 2px solid var(--accent);
+  box-shadow: 0 2px 6px rgba(59, 110, 245, 0.28);
+}
+input[type='range']::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--accent);
+}
+.scale { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--dim); }
+.scale b { color: var(--ink-2); }
+
+.namerow { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; }
+.namerow span { font-size: 12.5px; color: var(--muted); flex: none; }
+.namerow input {
+  flex: 1; min-width: 0;
+  font: inherit; font-size: 14px;
+  padding: 8px 11px; border-radius: 11px;
+  border: 1px solid transparent; background: var(--line-soft);
+  color: var(--ink); outline: none;
+}
+.namerow input:focus { border-color: var(--accent); background: var(--card); }
+
+.params { border-top: 1px solid var(--line); padding-top: 10px; margin-bottom: 10px; }
+.params summary, .import summary, .method summary {
+  cursor: pointer; list-style: none; user-select: none;
+  font-size: 12.5px; color: var(--muted);
+}
+.params summary::-webkit-details-marker,
+.import summary::-webkit-details-marker,
+.method summary::-webkit-details-marker { display: none; }
+.params summary::before, .import summary::before, .method summary::before {
+  content: '▸ '; color: var(--dim);
+}
+details[open] > summary::before { content: '▾ '; }
+
+.param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.param-grid label { font-size: 11px; color: var(--muted); display: grid; gap: 4px; }
+.param-grid input {
+  width: 100%; min-width: 0;
+  font: inherit; font-size: 13px;
+  border: 1px solid var(--line); border-radius: 9px;
+  padding: 7px 9px; background: var(--line-soft); color: var(--ink);
+  outline: none; font-variant-numeric: tabular-nums;
+}
+.param-grid input:focus { border-color: var(--accent); }
+
+.error {
+  margin: 8px 0 0; padding: 9px 12px;
+  background: var(--red-soft); color: var(--red);
+  border-radius: 10px; font-size: 12.5px;
+}
+
+.actions { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 8px; margin-top: 4px; }
+.btn {
+  font: inherit; font-size: 13.5px; font-weight: 600;
+  min-height: 42px; padding: 0 10px;
+  border-radius: 12px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink-2);
+  transition: transform 0.08s, background 0.15s;
+  white-space: nowrap;
+}
+.btn:active { transform: translateY(1px); }
+.btn.ghost:hover { background: var(--line-soft); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary.done { background: var(--green); border-color: var(--green); }
+.linkbtn {
+  display: block; margin: 10px auto 0;
+  background: none; border: 0; padding: 6px 8px;
+  color: var(--dim); font: inherit; font-size: 12px; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.mini {
+  flex: none; font: inherit; font-size: 12px;
+  padding: 5px 10px; border-radius: 9px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--card); color: var(--muted);
+}
+
+/* ---------- 结果 ---------- */
+.result .hero { padding: 2px 0 4px; }
+.hero-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.eyebrow { font-size: 12px; color: var(--muted); letter-spacing: 0.04em; }
+.badge { font-size: 11.5px; font-weight: 650; padding: 3px 10px; border-radius: 99px; background: var(--green-soft); color: var(--green); }
+.badge.off { background: var(--amber-soft); color: var(--amber); }
+
+.hero-num { display: flex; align-items: baseline; gap: 5px; margin: 2px 0; line-height: 1.05; }
+.hero-num span {
+  font-size: clamp(52px, 16vw, 72px); font-weight: 750; letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+  background: linear-gradient(135deg, var(--ink) 20%, var(--accent));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hero-num small { font-size: 15px; color: var(--muted); font-weight: 500; }
+.hero-sub { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 4px 0 0; font-size: 13px; color: var(--ink-2); }
+.hero-sub span:last-child { color: var(--muted); }
+
+.chain { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin: 9px 0 0; font-size: 12.5px; color: var(--muted); }
+.chain b { color: var(--ink); font-weight: 650; }
+.chain i { font-style: normal; color: var(--dim); font-size: 11px; }
+.inferred { font-size: 10.5px; color: var(--accent); background: var(--accent-soft); padding: 1px 5px; border-radius: 5px; }
+.chain-note { margin: 6px 0 0; font-size: 11.5px; color: var(--amber); }
+
+.hint { margin: -4px 0 10px; font-size: 11.5px; color: var(--dim); }
+
+.stats {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+  margin: 14px 0 0; background: var(--line);
+  border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+}
+.stats > div { background: var(--card); padding: 9px 12px; min-width: 0; }
+.stats dt { font-size: 11px; color: var(--dim); margin-bottom: 1px; }
+.stats dd { margin: 0; font-size: 14.5px; font-weight: 650; color: var(--ink); font-variant-numeric: tabular-nums; }
+.stats dd small { font-size: 11px; font-weight: 500; color: var(--muted); margin-left: 3px; }
+
+/* ---------- 图 ---------- */
+.chart { margin: 0 auto; max-width: 480px; }
+.chart svg { width: 100%; height: auto; display: block; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 6px; font-size: 11.5px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; }
+.legend .dot.curve { background: var(--accent); }
+.legend .dot.line { background: var(--red); }
+.bar { width: 10px; height: 9px; border-radius: 3px; background: var(--green-soft); border: 1px solid var(--green); }
+
+.pill {
+  flex: none; font-size: 11px; color: var(--accent);
+  background: var(--accent-soft); padding: 3px 8px; border-radius: 99px;
+}
+
+/* ---------- 推荐 ---------- */
+.rec-grid { display: grid; gap: 12px; }
+.rec-col h3 { margin: 0 0 8px; font-size: 12.5px; font-weight: 650; }
+.rec-col.reach h3 { color: var(--amber); }
+.rec-col.safe h3 { color: var(--green); }
+.rec-col h3 small { font-weight: 400; font-size: 11px; color: var(--dim); margin-left: 6px; }
+.rec-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.rec-list li { background: var(--line-soft); border-radius: 12px; padding: 9px 11px; }
+.rec-list .n { font-size: 13.5px; font-weight: 650; line-height: 1.35; }
+.rec-list .grp {
+  font-size: 10.5px; font-weight: 500; color: var(--muted);
+  background: var(--card); border: 1px solid var(--line);
+  padding: 1px 5px; border-radius: 5px; vertical-align: 1px;
+}
+.rec-list .h { font-size: 10.5px; color: var(--dim); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.rec-list .m { font-size: 11.5px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.rec-list .d { font-size: 11px; margin-top: 3px; }
+.rec-empty { background: none !important; color: var(--dim); font-size: 12px; padding: 6px 2px; }
+.rec-note { margin: 12px 0 0; font-size: 11.5px; color: var(--dim); line-height: 1.6; }
+
+@media (min-width: 560px) { .rec-grid { grid-template-columns: 1fr 1fr; } }
+
+/* ---------- 表 ---------- */
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -6px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 9px 8px; text-align: right; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+thead th { font-size: 11px; font-weight: 600; color: var(--dim); border-bottom: 1px solid var(--line); }
+tbody tr + tr td { border-top: 1px solid var(--line-soft); }
+tbody td { font-variant-numeric: tabular-nums; }
+tbody tr.me { background: var(--accent-soft); }
+tbody tr.tap { cursor: pointer; }
+tbody tr.tap:active { background: var(--line-soft); }
+.del {
+  border: 0; background: none; cursor: pointer; color: var(--dim);
+  font-size: 15px; line-height: 1; padding: 2px 4px; border-radius: 6px;
+}
+.del:hover { color: var(--red); }
+.pos { color: var(--green); font-weight: 650; }
+.neg { color: var(--amber); font-weight: 650; }
+.empty { color: var(--dim); font-size: 12.5px; padding: 10px 4px; text-align: center; }
+
+.import { margin-top: 10px; }
+.import .hint { font-size: 11.5px; color: var(--dim); margin: 8px 0 6px; }
+.import textarea {
+  width: 100%; font: inherit; font-size: 13px;
+  border: 1px solid var(--line); border-radius: 11px;
+  background: var(--line-soft); color: var(--ink);
+  padding: 9px 11px; resize: vertical; outline: none;
+  line-height: 1.7;
+}
+.import textarea:focus { border-color: var(--accent); }
+.import .btn { width: 100%; margin-top: 8px; }
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+
+/* ---------- 方法 ---------- */
+.method summary { font-size: 14.5px; font-weight: 650; color: var(--ink); margin-bottom: 10px; }
+.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: grid; gap: 8px; }
+.steps li {
+  counter-increment: step; position: relative;
+  padding: 9px 12px 9px 40px;
+  background: var(--line-soft); border-radius: 12px;
+  font-size: 12.5px; color: var(--ink-2); overflow-wrap: anywhere;
+}
+.steps li::before {
+  content: counter(step);
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  width: 20px; height: 20px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--accent-soft); color: var(--accent);
+  font-size: 11px; font-weight: 700;
+}
+.steps code { color: var(--accent); background: var(--accent-soft); padding: 1px 5px; border-radius: 5px; }
+.steps b { color: var(--ink); }
+
+.note {
+  margin: 12px 0 0; padding: 10px 12px;
+  background: var(--amber-soft); border-radius: 12px;
+  font-size: 12px; color: var(--amber); line-height: 1.65;
+}
+
+/* ---------- 页脚 ---------- */
+.foot { margin: 16px 0 28px; }
+.foot p { margin: 0 0 4px; font-size: 11.5px; color: var(--muted); line-height: 1.6; }
+.foot .dim { color: var(--dim); }
+
+.warn {
+  margin-top: 10px; padding: 10px 13px;
+  background: var(--amber-soft); color: var(--amber);
+  border-radius: 12px; font-size: 12.5px; line-height: 1.7;
+}
+.warn code { background: rgba(0, 0, 0, 0.08); padding: 1px 5px; border-radius: 4px; }
+
+@media (max-width: 380px) {
+  .row2 { grid-template-columns: 1fr; gap: 0; }
+  .actions { grid-template-columns: 1fr 1fr; }
+  .actions .primary { grid-column: 1 / -1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+</style>
+<script>
+  // 首帧就定好主题，避免浅色闪一下
+  try {
+    var saved = localStorage.getItem('sc.theme.v1');
+    document.documentElement.dataset.theme =
+      saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  } catch (e) {}
+</script>
+</head>
+<body>
+
+<noscript>
+  <div class="warn wrap" style="margin-top:10px">
+    这个页面需要 JavaScript。当前环境把它关掉了（比如被 <code>sandbox</code> 限制的预览窗口），
+    请用浏览器打开，或部署到 GitHub Pages 再看。
+  </div>
+</noscript>
+
+<div id="boot-error" class="warn wrap" hidden>
+  <b>脚本没跑起来</b>：页面停在默认数字，按钮不会响应。
+  常见原因是文件被放在不允许执行脚本的环境里（比如某些预览器、或被拦截的 iframe）。
+  用浏览器打开 <code>http://localhost:8000</code>（在 docs 目录执行
+  <code>python3 -m http.server 8000</code>），或部署到 GitHub Pages 再看。
+  <span id="boot-detail" class="dim"></span>
+</div>
+
+<header class="top">
+  <div class="wrap top-inner">
+    <div class="brand">
+      <div class="logo">∑</div>
+      <div class="brand-txt">
+        <h1>模考 → 高考 换算器</h1>
+        <p>宁德 · 物理类 · 市上线率口径</p>
+      </div>
+    </div>
+    <button id="btn-theme" class="icon-btn" type="button" aria-label="切换深浅色">◐</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ① 输入 -->
+  <section class="card" id="card-input">
+    <div class="card-head">
+      <h2>成绩</h2>
+      <p class="card-sub">改一个数，下面全部实时更新</p>
+    </div>
+
+    <div class="row2">
+      <label class="field" for="in-score">
+        <span class="label">模考分</span>
+        <span class="control">
+          <input id="in-score" type="number" inputmode="decimal" step="1" value="500" />
+          <em>分</em>
+        </span>
+      </label>
+      <label class="field" for="in-rank">
+        <span class="label">模考位次</span>
+        <span class="control">
+          <input id="in-rank" type="number" inputmode="numeric" step="1" value="3100" />
+          <em>名</em>
+        </span>
+      </label>
+    </div>
+
+    <p class="hint">只填分数或只填位次都行，另一边会在模考曲线上自动反推</p>
+
+    <div class="namerow">
+      <span>称呼</span>
+      <input id="in-name" type="text" value="你" maxlength="10" placeholder="你" autocomplete="off" />
+    </div>
+
+    <div class="field">
+      <div class="field-label">市上线率下调 <b id="out-drop">6.0</b> 个百分点</div>
+      <input id="in-drop" type="range" min="0" max="10" step="0.5" value="6" />
+      <div class="scale"><span>省 <b id="out-prov">29.0%</b></span><span id="out-rate">市 23.0%</span></div>
+    </div>
+
+    <details class="params">
+      <summary>考盘参数</summary>
+      <div class="param-grid">
+        <label>模考人数 <input id="p-mock-total" type="number" value="15000" /></label>
+        <label>模考线分 <input id="p-mock-line-score" type="number" value="466" /></label>
+        <label>模考线位次 <input id="p-mock-line-rank" type="number" value="4600" /></label>
+        <label>高考人数 <input id="p-gk-total" type="number" value="195315" /></label>
+        <label>高考线分 <input id="p-gk-line-score" type="number" value="528" /></label>
+        <label>高考线位次 <input id="p-gk-line-rank" type="number" value="58019" /></label>
+      </div>
+    </details>
+
+    <p id="error" class="error" hidden></p>
+
+    <div class="actions">
+      <button id="btn-add" class="btn primary" type="button">＋ 加入对比</button>
+      <button id="btn-copy" class="btn ghost" type="button">复制</button>
+      <button id="btn-export" class="btn ghost" type="button">存长图</button>
+    </div>
+    <button id="btn-reset" class="linkbtn" type="button">重置全部参数</button>
+  </section>
+
+  <!-- ② 结果 -->
+  <section class="card result" id="card-result">
+    <div class="hero">
+      <div class="hero-top">
+        <span class="eyebrow">高考等效分</span>
+        <span id="badge" class="badge">上线</span>
+      </div>
+      <div class="hero-num"><span id="res-score">534</span><small>分</small></div>
+      <p class="hero-sub"><span id="res-delta">高于特控线 6 分</span><span id="res-range">区间 532 – 538 分</span></p>
+      <p class="chain" id="chain"></p>
+      <p class="chain-note" id="chain-note" hidden></p>
+    </div>
+    <dl id="stats" class="stats"></dl>
+  </section>
+
+  <!-- ③ 曲线 -->
+  <section class="card" id="card-chart">
+    <div class="card-head">
+      <h2>位次 → 等效分</h2>
+      <p class="card-sub" id="chart-sub"></p>
+    </div>
+    <div id="chart" class="chart"></div>
+    <div class="legend">
+      <span><i class="dot curve"></i>换算曲线</span>
+      <span><i class="dot line"></i>省特控线</span>
+      <span><i class="bar"></i>你的区间</span>
+    </div>
+  </section>
+
+  <!-- ④ 能上 / 能冲 -->
+  <section class="card" id="card-rec">
+    <div class="card-head row">
+      <div>
+        <h2>能上 / 能冲</h2>
+        <p class="card-sub" id="rec-sub"></p>
+      </div>
+      <span class="pill">2025 投档线</span>
+    </div>
+    <div class="rec-grid">
+      <div class="rec-col reach">
+        <h3>冲 <small>比你高一点</small></h3>
+        <ol id="rec-reach" class="rec-list"></ol>
+      </div>
+      <div class="rec-col safe">
+        <h3>稳 <small>比你低一点</small></h3>
+        <ol id="rec-safe" class="rec-list"></ol>
+      </div>
+    </div>
+    <p class="rec-note" id="rec-note"></p>
+  </section>
+
+  <!-- ⑤ 多人对比 -->
+  <section class="card" id="card-compare">
+    <div class="card-head row">
+      <div>
+        <h2>多人对比</h2>
+        <p class="card-sub">点某个名字可以把它读回上面</p>
+      </div>
+      <button id="btn-clear" class="mini" type="button">清空</button>
+    </div>
+    <div class="table-wrap">
+      <table id="compare-table">
+        <thead>
+          <tr><th>名字</th><th>模考</th><th>省位次</th><th>等效分</th><th>与线</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <details class="import">
+      <summary>批量导入</summary>
+      <p class="hint">每行一个人：<code>500 3100</code>、<code>小明 500 3100</code>，或只给分数 <code>小明 507</code></p>
+      <textarea id="import-text" rows="4" spellcheck="false" placeholder="小明 500 3100&#10;小红 480 4200"></textarea>
+      <button id="btn-import" class="btn ghost" type="button">导入</button>
+    </details>
+  </section>
+
+  <!-- ⑤ 快速换算表 -->
+  <section class="card" id="card-lookup">
+    <div class="card-head">
+      <h2>快速换算表</h2>
+      <p class="card-sub">460–500 分之间的等效结果，点一行可读回上面</p>
+    </div>
+    <div class="table-wrap">
+      <table id="lookup-table">
+        <thead>
+          <tr><th>模考分</th><th>模考位次</th><th>省位次</th><th>等效分</th><th>与线</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ⑥ 方法 -->
+  <section class="card" id="card-method">
+    <details class="method" open>
+      <summary>这笔账是怎么算的</summary>
+      <ol id="steps" class="steps"></ol>
+    </details>
+    <p class="note">
+      口径提示：这里把「宁德市上线率」理解成 <b>比全省低 5~7 个百分点</b>（29.04% → 22%~24%），
+      不是相对下降 5%~7%。若你手上的官方数据不同，改滑块或考盘参数即可，整页会一起重算。
+    </p>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>数据口径：模考 15,000 人 / 466 分切 4,600 人；2026 福建物理类 195,315 人 / 特控线 528 分（累计 58,019 人）/ 本科线 446 分（累计 124,092 人），据省考试院 6·25 一分一段表。</p>
+    <p class="dim">位次是主结果，分数由你提供的模考锚点线性推出。结果仅供定位参考，不替代志愿填报决策。</p>
+    <p class="dim" id="build-info"></p>
+  </div>
+</footer>
+<script>
+(function (root) {
+  'use strict';
+
+  const BUILD = '2026-11-15 01:05';
+
+/* core.js — 纯算法层，不碰 DOM。
+ *
+ * 想把 demo 换成你自己的数据，只需要改 DEFAULT_PARAMS 和 SAMPLES 两处。
+ * 算法与 score_converter.py 一致，数值由 tests/verify.mjs 对拍。
+ */
+
+const DEFAULT_PARAMS = {
+  // 模考盘子
+  mock: { total: 15000, lineScore: 466, lineRank: 4600 },
+  // 高考盘子
+  gk: { total: 195315, lineScore: 528, lineRank: 58019 },  // 2026 官方一分一段：528→58,019；≥215 分共 195,315 人
+  // 已知模考锚点：[分数, 位次]，用来构造本地的“分数—位次”曲线
+  anchors: [
+    [500, 3100],
+    [493, 3500],
+    [466, 4600],
+    [460, 4800],
+  ],
+  // 市上线率比全省低多少（百分点的小数：0.06 = 6 个百分点）
+  dropPp: 0.06,
+  // 结果区间的半宽（±1 个百分点）
+  bandPp: 0.01,
+};
+
+const SAMPLES = [
+  { name: '你', score: 500, rank: 3100 },
+  { name: '同学A', score: 493, rank: 3500 },
+  { name: '朋友', score: 460, rank: 4800 },
+];
+
+const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
+
+/** 浅合并参数（mock / gk 两层） */
+function mergeParams(base, over = {}) {
+  return {
+    ...base,
+    ...over,
+    mock: { ...base.mock, ...(over.mock || {}) },
+    gk: { ...base.gk, ...(over.gk || {}) },
+  };
+}
+
+/* ---------- 1. 市上线率 ---------- */
+
+function cityRate(gk, dropPp) {
+  const r = gk.lineRank / gk.total - dropPp;
+  if (!(r > 0)) throw new Error('下调后市上线率必须为正');
+  return r;
+}
+
+function cityLineRank(mock, gk, dropPp) {
+  return cityRate(gk, dropPp) * mock.total;
+}
+
+function multiplier(mock, gk, dropPp) {
+  return gk.lineRank / cityLineRank(mock, gk, dropPp);
+}
+
+function provincialRank(rank, mock, gk, dropPp) {
+  return clamp(rank * multiplier(mock, gk, dropPp), 1, gk.total);
+}
+
+/* ---------- 2. 模考曲线（分段线性） ---------- */
+
+function buildCurve(anchors) {
+  const pts = anchors
+    .map(([score, rank]) => ({ score: Number(score), rank: Number(rank) }))
+    .sort((a, b) => a.rank - b.rank);
+
+  if (pts.length < 2) throw new Error('至少需要 2 个模考锚点');
+  for (let i = 1; i < pts.length; i++) {
+    if (!(pts[i - 1].score > pts[i].score)) {
+      throw new Error(
+        `锚点分数必须随位次递减：第 ${pts[i - 1].rank} 名 ${pts[i - 1].score} 分 → 第 ${pts[i].rank} 名 ${pts[i].score} 分`
+      );
+    }
+  }
+
+  function scoreAt(rank, extrapolate = false) {
+    const first = pts[0];
+    const last = pts[pts.length - 1];
+
+    if (rank <= first.rank) {
+      if (!extrapolate) return first.score;
+      const a = pts[0];
+      const b = pts[1];
+      return a.score + ((rank - a.rank) * (b.score - a.score)) / (b.rank - a.rank);
+    }
+    if (rank >= last.rank) {
+      if (!extrapolate) return last.score;
+      const a = pts[pts.length - 2];
+      const b = last;
+      return b.score + ((rank - b.rank) * (b.score - a.score)) / (b.rank - a.rank);
+    }
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1];
+      const b = pts[i];
+      if (rank <= b.rank) {
+        const t = (rank - a.rank) / (b.rank - a.rank);
+        return a.score + t * (b.score - a.score);
+      }
+    }
+    return last.score;
+  }
+
+  /** 分数 → 模考位次（分段线性反解） */
+  /** 分数 → 模考位次。extrapolate=true 时按端点斜率线性外推 */
+  function rankAt(score, extrapolate = false) {
+    const first = pts[0];
+    const last = pts[pts.length - 1];
+
+    if (score >= first.score) {
+      if (!extrapolate) return first.rank;
+      const a = pts[0];
+      const b = pts[1];
+      return a.rank + ((score - a.score) * (b.rank - a.rank)) / (b.score - a.score);
+    }
+    if (score <= last.score) {
+      if (!extrapolate) return last.rank;
+      const a = pts[pts.length - 2];
+      const b = last;
+      return b.rank + ((score - b.score) * (b.rank - a.rank)) / (b.score - a.score);
+    }
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1];
+      const b = pts[i]; // a.rank < b.rank, a.score > b.score
+      if (score <= a.score && score >= b.score) {
+        const t = (score - a.score) / (b.score - a.score);
+        return a.rank + t * (b.rank - a.rank);
+      }
+    }
+    return last.rank;
+  }
+
+  /** 锚点覆盖的分数区间，用来判断是否外推 */
+  const scoreRange = { low: pts[pts.length - 1].score, high: pts[0].score };
+
+  return { pts, scoreAt, rankAt, scoreRange };
+}
+
+/* ---------- 3. 模型：公共量一次算好 ---------- */
+
+function makeModel(params = DEFAULT_PARAMS) {
+  const p = mergeParams(DEFAULT_PARAMS, params);
+  const { mock, gk, dropPp } = p;
+
+  if (!(mock.total > 0) || !(gk.total > 0)) throw new Error('人数必须为正');
+  if (!(mock.lineRank > 0 && mock.lineRank <= mock.total)) throw new Error('模考线位次超出人数范围');
+  if (!(gk.lineRank > 0 && gk.lineRank <= gk.total)) throw new Error('高考线位次超出人数范围');
+  if (!(dropPp >= 0 && dropPp < 0.2)) throw new Error('下调幅度需在 0 – 20 个百分点之间');
+
+  const curve = buildCurve(p.anchors);
+  const rate = cityRate(gk, dropPp);
+  const lineRankMock = cityLineRank(mock, gk, dropPp);
+  const cityScore = curve.scoreAt(lineRankMock);
+  const offset = gk.lineScore - cityScore;
+  const k = multiplier(mock, gk, dropPp);
+
+  return {
+    params: p,
+    curve,
+    rate,
+    lineRankMock,
+    cityScore,
+    offset,
+    k,
+    // 全省位次 → 等效分（画图用）
+    scoreAtProvince: (rProv) => curve.scoreAt(rProv / k, true) + offset,
+  };
+}
+
+/** 按模考分数区间生成一张换算表（分数 → 位次 → 省位次 → 等效分） */
+function lookupTable(model, { from, to, step = 5 } = {}) {
+  const { curve, params, offset } = model;
+  // 只覆盖有锚点的区间，超出范围不外推，避免给出没依据的分数
+  const lo = from ?? curve.pts[curve.pts.length - 1].score;
+  const hi = to ?? curve.pts[0].score;
+  const rows = [];
+  for (let s = hi; s >= lo; s -= step) {
+    const rank = curve.rankAt(s);
+    if (!Number.isFinite(rank) || rank < 1 || rank > params.mock.total) continue;
+    rows.push({
+      score: s,
+      rank,
+      rankProv: provincialRank(rank, params.mock, params.gk, params.dropPp),
+      scoreProv: s + offset,
+      delta: s + offset - params.gk.lineScore,
+      online: rank / params.mock.total <= model.rate,
+    });
+  }
+  return rows;
+}
+
+/* ---------- 4. 单人换算 ---------- */
+
+function convert(input, params = DEFAULT_PARAMS, model = null) {
+  const m = model || makeModel(params);
+  const { mock, gk, dropPp, bandPp } = m.params;
+
+  const rawScore = input.score;
+  const rawRank = input.rank;
+  const hasScore = rawScore !== '' && rawScore != null && rawScore !== undefined && Number.isFinite(Number(rawScore));
+  const rankNum = Number(rawRank);
+  const hasRank = rawRank !== '' && rawRank != null && rawRank !== undefined && Number.isFinite(rankNum) && rankNum > 0;
+
+  if (!hasScore && !hasRank) throw new Error('分数和位次至少填一个');
+  if (hasRank && rankNum > mock.total) {
+    throw new Error(`模考位次需在 1 – ${mock.total.toLocaleString('zh-CN')} 之间`);
+  }
+
+  let score;
+  let rank;
+  let rankInferred = false;
+  let scoreInferred = false;
+
+  if (hasRank) {
+    rank = rankNum;
+    if (hasScore) {
+      score = Number(rawScore);
+    } else {
+      score = m.curve.scoreAt(rank);
+      scoreInferred = true;
+    }
+  } else {
+    score = Number(rawScore);
+    rank = clamp(m.curve.rankAt(score, true), 1, mock.total);
+    rankInferred = true;
+  }
+
+  const range = m.curve.scoreRange;
+  const extrapolated = score < range.low || score > range.high;
+
+  const offsetAt = (d) => gk.lineScore - m.curve.scoreAt(cityLineRank(mock, gk, d));
+  const lo = clamp(dropPp + bandPp, 0, 0.19); // 下调更多 → 位次更差、分数更低
+  const hi = clamp(dropPp - bandPp, 0, 0.19);
+
+  const rankProv = provincialRank(rank, mock, gk, dropPp);
+
+  return {
+    input: { score: hasScore ? score : null, rank: hasRank ? rank : null },
+    scoreInferred,
+    rankInferred,
+    score,
+    rank,
+    extrapolated,
+    range,
+    dropPp,
+    rate: m.rate,
+    lineRankMock: m.lineRankMock,
+    cityScore: m.cityScore,
+    offset: m.offset,
+    k: m.k,
+    rankProv,
+    rankBest: provincialRank(rank, mock, gk, hi),
+    rankWorst: provincialRank(rank, mock, gk, lo),
+    scoreProv: score + m.offset,
+    scoreBest: score + offsetAt(hi),
+    scoreWorst: score + offsetAt(lo),
+    topPct: rank / mock.total,
+    topPctProv: rankProv / gk.total,
+    online: rank / mock.total <= m.rate,
+    gapRank: m.lineRankMock - rank,
+    delta: score + m.offset - gk.lineScore,
+  };
+}
+
+/** 把多年的投档线表合并成记录：同一 学校+专业组 归到一条，年份挂在 years 下 */
+function buildRecords(admissions) {
+  const tables = (admissions && admissions.tables) || {};
+  const map = new Map();
+  const years = Object.keys(tables).map(Number).sort((a, b) => a - b);
+  // 校名变更：2024 年还叫「闽江学院」
+  const ALIAS = { 闽江学院: '闽江大学' };
+  for (const y of years) {
+    for (const r of tables[y].rows) {
+      const key = (ALIAS[r[0]] || r[0]) + '|' + r[1];
+      let rec = map.get(key);
+      if (!rec) {
+        rec = { school: r[0], group: r[1], nature: r[4] || '', years: {} };
+        map.set(key, rec);
+      }
+      if (r[4] && !rec.nature) rec.nature = r[4];
+      rec.school = r[0]; // 年份升序遍历，最后写入的即最新校名
+      rec.years[y] = { score: r[2], rank: r[3] };
+    }
+  }
+  const out = [];
+  for (const rec of map.values()) {
+    const ys = Object.keys(rec.years).map(Number).sort((a, b) => b - a);
+    rec.latestYear = ys[0];
+    rec.score = rec.years[ys[0]].score;
+    rec.rank = rec.years[ys[0]].rank;
+    rec.yearList = ys;
+    out.push(rec);
+  }
+  return out;
+}
+
+/** 按省位次给出「冲 / 稳」各 n 个专业组（用每个专业组最近一年的位次排序）
+ *  冲：最近一年投档位次比你更靠前（更难），取最接近的
+ *  稳：位次比你靠后（更松），取最接近的
+ */
+function recommendGroups(rankProv, admissions, n = 5) {
+  const all = buildRecords(admissions);
+  if (!all.length || !Number.isFinite(rankProv)) {
+    return { reach: [], safe: [], total: 0, newestYear: null };
+  }
+  const newestYear = Math.max(...Object.keys(admissions.tables).map(Number));
+  // 只用「最近两年」有数据的组：两年前的分数线不足以参考
+  const records = all.filter((r) => r.latestYear >= newestYear - 1);
+  const reach = records.filter((g) => g.rank < rankProv).sort((a, b) => b.rank - a.rank).slice(0, n);
+  const safe = records.filter((g) => g.rank >= rankProv).sort((a, b) => a.rank - b.rank).slice(0, n);
+  return { reach, safe, total: records.length, skipped: all.length - records.length, newestYear };
+}
+
+  root.SC = Object.assign(root.SC || {}, {
+    DEFAULT_PARAMS,
+    BUILD,
+    SAMPLES,
+    mergeParams,
+    cityRate,
+    cityLineRank,
+    multiplier,
+    provincialRank,
+    buildCurve,
+    makeModel,
+    lookupTable,
+    convert,
+    recommendGroups,
+    buildRecords,
+  });
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+
+</script>
+<script>
+/* admissions.js — 福建省普通类本科批「院校专业组」投档最低分（物理科目组）
+ *
+ * 2026：省考试院 2026-07-25 公告 PDF（扫描件）第 1–10 页，即院校代码 1001–1194，
+ *       逐行录入 217 个专业组；位次由 2026 一分一段表（442–564 分）按分数精确换算。
+ * 2025：省考试院 2025-07-26 公布，128 个专业组（482–574 分，位次取自原表）。
+ * 2024：省考试院 2024 公布，109 个专业组；位次由 2024 一分一段表换算。
+ *
+ * 字段：[学校（含办学备注）, 专业组代码, 最低分, 最低位次, 办学性质]
+ */
+(function (root) {
+  'use strict';
+
+  root.SC = Object.assign(root.SC || {}, {
+    ADMISSIONS: {
+      subject: '物理',
+      batch: '本科批',
+      tables: {
+        2026: {
+          source: '福建省教育考试院 2026-07-25 院校专业组投档最低分（第 1–10 页）',
+          coverage: '217 个专业组（院校代码 1001–1194）',
+          rows: [
+        ["福建医科大学(组1)", "516", 563, 32930, ""],
+        ["集美大学(01)", "999", 563, 32930, ""],
+        ["华侨大学(临床医学)", "500", 562, 33581, ""],
+        ["福建师范大学", "999", 561, 34198, ""],
+        ["厦门医学院", "500", 561, 34198, ""],
+        ["福建师范大学(中日合作)", "500", 560, 34853, ""],
+        ["福建师范大学(中英合作)", "500", 559, 35474, ""],
+        ["集美大学(面向厦门)", "900", 558, 36136, ""],
+        ["集美大学(面向厦门,02)", "500", 558, 36136, ""],
+        ["福建医科大学(组4)", "516", 557, 36838, ""],
+        ["集美大学", "900", 557, 36838, ""],
+        ["厦门理工学院", "500", 557, 36838, ""],
+        ["福建农林大学", "500", 556, 37529, ""],
+        ["福建农林大学", "600", 556, 37529, ""],
+        ["集美大学", "516", 556, 37529, ""],
+        ["福建理工大学", "500", 554, 38919, ""],
+        ["集美大学", "500", 554, 38919, ""],
+        ["集美大学(面向厦门)", "516", 554, 38919, ""],
+        ["集美大学(面向厦门,01)", "999", 554, 38919, ""],
+        ["福建农林大学(闽台合作)", "999", 552, 40333, ""],
+        ["华侨大学", "999", 552, 40333, ""],
+        ["集美大学", "999", 552, 40333, ""],
+        ["厦门理工学院(地方专项)", "500", 552, 40333, ""],
+        ["福建农林大学", "999", 551, 41021, ""],
+        ["福建中医药大学(地方专项)", "500", 549, 42405, ""],
+        ["闽江大学", "500", 549, 42405, ""],
+        ["闽江大学(面向福州)", "500", 549, 42405, ""],
+        ["厦门理工学院(国际课程项目)", "500", 548, 43130, ""],
+        ["华侨大学(国际项目)", "999", 547, 43819, ""],
+        ["福建理工大学(地方专项)", "500", 546, 44530, ""],
+        ["福建中医药大学", "500", 546, 44530, ""],
+        ["华侨大学(面向泉州)", "999", 546, 44530, ""],
+        ["厦门理工学院(面向厦门)", "500", 546, 44530, ""],
+        ["华侨大学(面向厦门)", "999", 545, 45182, ""],
+        ["华侨大学(面向厦门,国际项目)", "999", 545, 45182, ""],
+        ["福建理工大学", "999", 544, 45913, ""],
+        ["福建中医药大学(组1)", "500", 544, 45913, ""],
+        ["闽江大学(新华都商学院)", "999", 544, 45913, ""],
+        ["闽南师范大学", "500", 544, 45913, ""],
+        ["集美大学(地方专项)", "999", 543, 46614, ""],
+        ["集美大学(地方专项,01)", "500", 543, 46614, ""],
+        ["闽江大学(地方专项)", "500", 543, 46614, ""],
+        ["厦门理工学院", "999", 543, 46614, ""],
+        ["闽江大学", "900", 541, 48062, ""],
+        ["福建理工大学(闽台合作)", "500", 540, 48825, ""],
+        ["闽江大学", "999", 540, 48825, ""],
+        ["闽南师范大学(地方专项)", "500", 539, 49611, ""],
+        ["厦门理工学院(面向厦门)", "999", 539, 49611, ""],
+        ["厦门理工学院(中外合作)", "500", 539, 49611, ""],
+        ["福建农林大学(地方专项)", "500", 538, 50401, ""],
+        ["福建警察学院", "500", 537, 51112, ""],
+        ["福建医科大学(组3)", "516", 537, 51112, ""],
+        ["福建江夏学院", "500", 536, 51897, ""],
+        ["福建中医药大学(地方专项,组1)", "500", 536, 51897, ""],
+        ["华侨大学(面向泉州,国际项目)", "999", 536, 51897, ""],
+        ["闽江大学(面向福州)", "900", 535, 52644, ""],
+        ["厦门理工学院(闽台合作,面向厦门)", "999", 535, 52644, ""],
+        ["闽江大学(面向福州)", "999", 534, 53446, ""],
+        ["福建医科大学", "500", 533, 54222, ""],
+        ["泉州师范学院(面向泉州)", "500", 533, 54222, ""],
+        ["泉州师范学院(软件类)", "500", 533, 54222, ""],
+        ["厦门理工学院(国际课程项目)", "999", 533, 54222, ""],
+        ["福建医科大学", "999", 532, 54976, ""],
+        ["泉州师范学院", "500", 532, 54976, ""],
+        ["厦门理工学院(闽台合作)", "999", 532, 54976, ""],
+        ["福建理工大学(中外合作)", "500", 531, 55717, ""],
+        ["福建师范大学(闽台合作)", "999", 531, 55717, ""],
+        ["莆田学院", "500", 531, 55717, ""],
+        ["福建医科大学(地方专项,组3)", "516", 530, 56500, ""],
+        ["福建中医药大学(组1)", "600", 530, 56500, ""],
+        ["福建中医药大学(地方专项)", "600", 530, 56500, ""],
+        ["厦门医学院(组1)", "500", 530, 56500, ""],
+        ["福建江夏学院(闽台合作)", "500", 529, 57248, ""],
+        ["福建理工大学(地方专项)", "999", 529, 57248, ""],
+        ["福建中医药大学(地方专项,组2)", "500", 529, 57248, ""],
+        ["闽江大学(地方专项)", "999", 529, 57248, ""],
+        ["闽南师范大学", "999", 529, 57248, ""],
+        ["福建农林大学(闽台合作)", "500", 528, 58019, ""],
+        ["闽南师范大学(组1)", "999", 528, 58019, ""],
+        ["福建江夏学院", "999", 526, 59616, ""],
+        ["福建理工大学(闽台合作)", "999", 526, 59616, ""],
+        ["福建中医药大学(组2)", "500", 526, 59616, ""],
+        ["福建中医药大学(组3)", "500", 526, 59616, ""],
+        ["厦门医学院", "999", 526, 59616, ""],
+        ["闽南师范大学(地方专项)", "900", 525, 60374, ""],
+        ["莆田学院(组1)", "500", 525, 60374, ""],
+        ["福建警察学院", "999", 524, 61141, ""],
+        ["福建医科大学(地方专项,组2)", "516", 524, 61141, ""],
+        ["福建医科大学(地方专项)", "999", 523, 61908, ""],
+        ["福建中医药大学(闽台合作,组1)", "500", 523, 61908, ""],
+        ["莆田学院(面向莆田,组1)", "500", 523, 61908, ""],
+        ["福建中医药大学", "999", 522, 62710, ""],
+        ["福建中医药大学(闽台合作)", "500", 522, 62710, ""],
+        ["泉州师范学院", "900", 522, 62710, ""],
+        ["福建医科大学(组2)", "516", 521, 63493, ""],
+        ["闽江大学(闽台合作)", "999", 521, 63493, ""],
+        ["宁德师范学院", "500", 521, 63493, ""],
+        ["泉州师范学院(地方专项)", "500", 521, 63493, ""],
+        ["福建医科大学(地方专项)", "500", 519, 65118, ""],
+        ["莆田学院(面向莆田)", "500", 519, 65118, ""],
+        ["福建技术师范学院", "500", 518, 65881, ""],
+        ["闽江大学(中外合作)", "500", 517, 66621, ""],
+        ["莆田学院", "999", 517, 66621, ""],
+        ["泉州师范学院", "999", 517, 66621, ""],
+        ["泉州师范学院(地方专项)", "516", 517, 66621, ""],
+        ["泉州师范学院(面向泉州)", "900", 517, 66621, ""],
+        ["泉州师范学院(面向泉州)", "999", 517, 66621, ""],
+        ["厦门医学院(组2)", "500", 517, 66621, ""],
+        ["龙岩学院", "500", 516, 67428, ""],
+        ["闽南师范大学", "600", 516, 67428, ""],
+        ["闽南师范大学(地方专项)", "999", 516, 67428, ""],
+        ["福建中医药大学(组2)", "600", 515, 68204, ""],
+        ["福建中医药大学(闽台合作)", "999", 515, 68204, ""],
+        ["厦门医学院(组3)", "500", 515, 68204, ""],
+        ["三明学院", "500", 514, 69027, ""],
+        ["福建农林大学(中外合作)", "500", 513, 69823, ""],
+        ["闽江大学(国际课程项目)", "999", 512, 70621, ""],
+        ["福建江夏学院(闽台合作)", "999", 511, 71411, ""],
+        ["宁德师范学院", "999", 511, 71411, ""],
+        ["福建商学院", "500", 510, 72215, ""],
+        ["宁德师范学院(面向宁德)", "500", 510, 72215, ""],
+        ["福建技术师范学院", "999", 509, 73037, ""],
+        ["闽南师范大学(闽台合作)", "999", 509, 73037, ""],
+        ["武夷学院", "500", 509, 73037, ""],
+        ["福建商学院", "999", 508, 73831, ""],
+        ["福州职业技术大学", "999", 508, 73831, ""],
+        ["龙岩学院", "999", 508, 73831, ""],
+        ["莆田学院(面向莆田)", "999", 508, 73831, ""],
+        ["宁德师范学院(面向宁德)", "999", 507, 74705, ""],
+        ["三明学院", "999", 507, 74705, ""],
+        ["泉州师范学院(闽台合作)", "500", 506, 75490, ""],
+        ["厦门医学院", "600", 506, 75490, ""],
+        ["黎明职业大学", "999", 505, 76298, ""],
+        ["武夷学院", "999", 505, 76298, ""],
+        ["莆田学院", "600", 504, 77097, ""],
+        ["福建商学院(闽台合作)", "500", 503, 77900, ""],
+        ["莆田学院(面向莆田)", "600", 503, 77900, ""],
+        ["宁德师范学院", "600", 502, 78718, ""],
+        ["泉州师范学院(地方专项)", "999", 502, 78718, ""],
+        ["厦门大学嘉庚学院", "500", 502, 78718, ""],
+        ["福建技术师范学院(闽台合作)", "500", 501, 79574, ""],
+        ["宁德师范学院(闽台合作)", "500", 501, 79574, ""],
+        ["厦门大学嘉庚学院(组1)", "500", 501, 79574, ""],
+        ["福建农林大学(中外合作)", "999", 500, 80389, ""],
+        ["武夷学院(面向南平)", "500", 500, 80389, ""],
+        ["福建江夏学院(国际课程项目)", "999", 499, 81279, ""],
+        ["武夷学院(闽台合作)", "500", 499, 81279, ""],
+        ["龙岩学院(面向龙岩)", "500", 498, 82040, ""],
+        ["宁德师范学院(面向宁德)", "600", 497, 82891, ""],
+        ["莆田学院(闽台合作)", "600", 497, 82891, ""],
+        ["泉州师范学院(闽台合作)", "999", 497, 82891, ""],
+        ["武夷学院(面向南平)", "999", 497, 82891, ""],
+        ["闽江大学(中外合作)", "999", 496, 83700, ""],
+        ["三明学院(面向三明)", "500", 496, 83700, ""],
+        ["三明学院(闽台合作)", "999", 496, 83700, ""],
+        ["福建中医药大学(中外合作)", "600", 495, 84535, ""],
+        ["龙岩学院(面向龙岩)", "999", 494, 85323, ""],
+        ["宁德师范学院(闽台合作)", "999", 494, 85323, ""],
+        ["三明学院(面向三明)", "999", 494, 85323, ""],
+        ["福建技术师范学院(闽台合作)", "999", 493, 86137, ""],
+        ["福建商学院(闽台合作)", "999", 493, 86137, ""],
+        ["集美大学诚毅学院(组1)", "999", 493, 86137, ""],
+        ["武夷学院(闽台合作)", "999", 493, 86137, ""],
+        ["厦门大学嘉庚学院", "999", 493, 86137, ""],
+        ["厦门大学嘉庚学院(组1)", "999", 493, 86137, ""],
+        ["集美大学诚毅学院", "500", 491, 87808, ""],
+        ["集美大学诚毅学院", "999", 491, 87808, ""],
+        ["集美大学诚毅学院(组1)", "500", 491, 87808, ""],
+        ["厦门大学嘉庚学院(组2)", "500", 491, 87808, ""],
+        ["三明学院(闽台合作)", "500", 490, 88663, ""],
+        ["福建师范大学协和学院", "500", 489, 89469, ""],
+        ["福州大学至诚学院", "500", 489, 89469, ""],
+        ["莆田学院(中外合作)", "999", 489, 89469, ""],
+        ["三明学院(国际课程项目)", "999", 489, 89469, ""],
+        ["集美大学诚毅学院(组2)", "999", 488, 90344, ""],
+        ["厦门大学嘉庚学院(组2)", "999", 488, 90344, ""],
+        ["福州大学至诚学院", "999", 487, 91152, ""],
+        ["福建师范大学协和学院", "999", 485, 92845, ""],
+        ["福建农林大学金山学院", "500", 484, 93704, ""],
+        ["福建农林大学金山学院(闽台合作)", "999", 483, 94533, ""],
+        ["福建师范大学协和学院(组2)", "999", 482, 95334, ""],
+        ["福建师范大学协和学院(组1)", "999", 481, 96171, ""],
+        ["福建农林大学金山学院", "999", 480, 96969, ""],
+        ["福建农林大学金山学院", "600", 479, 97792, ""],
+        ["仰恩大学", "500", 477, 99399, ""],
+        ["三明学院(国际课程项目)", "500", 476, 100230, ""],
+        ["三明学院(中外合作)", "500", 476, 100230, ""],
+        ["福建师范大学协和学院(国际课程项目)", "999", 475, 101035, ""],
+        ["仰恩大学", "999", 474, 101895, ""],
+        ["闽南科技学院", "500", 469, 105996, ""],
+        ["闽南师范大学(中高计划1)", "999", 467, 107584, ""],
+        ["龙岩学院(中外合作)", "500", 466, 108405, ""],
+        ["泉州信息工程学院(中外合作)", "500", 466, 108405, ""],
+        ["闽南科技学院", "999", 465, 109186, ""],
+        ["泉州信息工程学院", "999", 465, 109186, ""],
+        ["泉州信息工程学院", "500", 463, 110778, ""],
+        ["闽南师范大学(中美计划)", "999", 462, 111606, ""],
+        ["泉州职业技术大学", "999", 455, 117023, ""],
+        ["闽南师范大学(中美计划)", "500", 450, 120944, ""],
+        ["厦门华厦学院", "500", 450, 120944, ""],
+        ["福州外语外贸学院", "999", 448, 122531, ""],
+        ["闽南师范大学(中高计划1)", "500", 448, 122531, ""],
+        ["闽南师范大学(中高计划2)", "999", 447, 123294, ""],
+        ["闽南师范大学(中外合作)", "500", 447, 123294, ""],
+        ["厦门工学院(中外合作)", "500", 447, 123294, ""],
+        ["福州工商学院", "500", 446, 124092, ""],
+        ["福州工商学院", "999", 446, 124092, ""],
+        ["福州理工学院", "500", 446, 124092, ""],
+        ["福州理工学院", "999", 446, 124092, ""],
+        ["福州外语外贸学院", "500", 446, 124092, ""],
+        ["闽南理工学院", "500", 446, 124092, ""],
+        ["闽南理工学院", "999", 446, 124092, ""],
+        ["厦门工学院", "500", 446, 124092, ""],
+        ["厦门工学院", "999", 446, 124092, ""],
+        ["厦门华厦学院", "999", 446, 124092, ""],
+        ["阳光学院", "500", 446, 124092, ""],
+        ["阳光学院", "999", 446, 124092, ""],
+          ],
+        },
+        2025: {
+          source: '福建省教育考试院 2025-07-26 院校专业组投档最低分',
+          coverage: '128 个专业组（482–574 分）',
+          rows: [
+        ["福建农林大学(定向专业,新罗区)", "500", 574, 22981, "公办"],
+        ["福州大学(闽台合作办学)", "999", 572, 23889, "公办"],
+        ["华侨大学", "500", 572, 23889, "公办"],
+        ["福建师范大学", "900", 571, 24364, "公办"],
+        ["华侨大学(临床医学)", "500", 571, 24364, "公办"],
+        ["福建农林大学(定向专业,永泰县)", "500", 570, 24825, "公办"],
+        ["华侨大学(面向泉州)", "500", 570, 24825, "公办"],
+        ["福建农林大学(定向专业,明溪县)", "500", 569, 25291, "公办"],
+        ["福建师范大学", "999", 567, 26218, "公办"],
+        ["华侨大学(面向厦门)", "500", 566, 26736, "公办"],
+        ["福建师范大学", "516", 562, 28701, "公办"],
+        ["福建农林大学(定向专业,连城县)", "500", 561, 29212, "公办"],
+        ["福建师范大学(中日合作)", "500", 557, 31329, "公办"],
+        ["集美大学", "900", 557, 31329, "公办"],
+        ["福建师范大学(中外合作)", "500", 554, 32905, "公办"],
+        ["集美大学(面向厦门)", "500", 554, 32905, "公办"],
+        ["集美大学(面向厦门)", "900", 551, 34510, "公办"],
+        ["福建农林大学", "600", 550, 35037, "公办"],
+        ["集美大学(面向厦门)", "999", 550, 35037, "公办"],
+        ["集美大学", "500", 549, 35614, "公办"],
+        ["福建农林大学(闽台合作办学)", "500", 548, 36213, "公办"],
+        ["华侨大学(面向泉州)", "999", 548, 36213, "公办"],
+        ["华侨大学(面向厦门)", "999", 548, 36213, "公办"],
+        ["集美大学", "999", 548, 36213, "公办"],
+        ["福建理工大学", "500", 546, 37396, "公办"],
+        ["华侨大学", "999", 546, 37396, "公办"],
+        ["福建医科大学", "516", 545, 37957, "公办"],
+        ["福建农林大学", "500", 542, 39897, "公办"],
+        ["华侨大学(面向厦门,中外联培项目)", "999", 542, 39897, "公办"],
+        ["集美大学", "516", 542, 39897, "公办"],
+        ["集美大学(面向厦门)", "516", 542, 39897, "公办"],
+        ["福建农林大学", "999", 541, 40511, "公办"],
+        ["福建农林大学(闽台合作办学)", "999", 541, 40511, "公办"],
+        ["厦门理工学院", "500", 540, 41148, "公办"],
+        ["福建理工大学", "999", 538, 42366, "公办"],
+        ["闽江大学(新华都商学院)", "999", 530, 47532, "公办"],
+        ["福建理工大学(闽台合作办学)", "999", 528, 48837, "公办"],
+        ["厦门理工学院(面向厦门)", "500", 528, 48837, "公办"],
+        ["华侨大学(面向泉州,中外联培项目)", "999", 527, 49465, "公办"],
+        ["闽江大学(面向福州)", "500", 527, 49465, "公办"],
+        ["闽江大学(面向福州)", "999", 527, 49465, "公办"],
+        ["莆田学院(面向莆田)(临床及口腔)", "500", 527, 49465, "公办"],
+        ["福建医科大学", "500", 526, 50184, "公办"],
+        ["厦门理工学院(面向厦门)", "999", 526, 50184, "公办"],
+        ["福建农林大学(中外合作)", "500", 525, 50881, "公办"],
+        ["福建中医药大学", "500", 525, 50881, "公办"],
+        ["福建警察学院", "500", 524, 51599, "公办"],
+        ["福建师范大学(闽台合作办学)", "999", 523, 52278, "公办"],
+        ["闽江大学", "999", 523, 52278, "公办"],
+        ["闽南师范大学", "500", 523, 52278, "公办"],
+        ["福建中医药大学", "999", 522, 53007, "公办"],
+        ["泉州师范学院(软件学院)", "500", 522, 53007, "公办"],
+        ["厦门理工学院(闽台合作办学)", "999", 522, 53007, "公办"],
+        ["福建江夏学院", "500", 521, 53711, "公办"],
+        ["福建警察学院", "999", 521, 53711, "公办"],
+        ["闽江大学(面向福州)", "900", 521, 53711, "公办"],
+        ["福建中医药大学(护理学)", "600", 520, 54409, "公办"],
+        ["闽江大学", "900", 520, 54409, "公办"],
+        ["泉州师范学院", "500", 520, 54409, "公办"],
+        ["厦门理工学院(面向厦门,闽台合作办学)", "999", 520, 54409, "公办"],
+        ["厦门理工学院(国际课程项目)", "999", 519, 55133, "公办"],
+        ["闽南师范大学", "999", 518, 55877, "公办"],
+        ["泉州师范学院(面向泉州)", "500", 518, 55877, "公办"],
+        ["厦门医学院", "999", 517, 56618, "公办"],
+        ["福建中医药大学(闽台合作办学)", "500", 516, 57329, "公办"],
+        ["福建江夏学院(闽台合作办学)", "500", 514, 58785, "公办"],
+        ["福建理工大学(中外合作)", "500", 514, 58785, "公办"],
+        ["福建江夏学院", "999", 512, 60283, "公办"],
+        ["泉州师范学院", "900", 512, 60283, "公办"],
+        ["泉州师范学院(面向泉州)", "999", 512, 60283, "公办"],
+        ["泉州师范学院", "999", 511, 61013, "公办"],
+        ["闽南师范大学", "600", 510, 61799, "公办"],
+        ["莆田学院", "500", 510, 61799, "公办"],
+        ["莆田学院(面向莆田)", "500", 510, 61799, "公办"],
+        ["泉州师范学院(面向泉州)", "900", 510, 61799, "公办"],
+        ["福建中医药大学(闽台合作办学)", "999", 508, 63376, "公办"],
+        ["闽江大学(闽台合作办学)", "999", 508, 63376, "公办"],
+        ["厦门医学院", "500", 508, 63376, "公办"],
+        ["福建农林大学(中外合作)", "999", 507, 64125, "公办"],
+        ["莆田学院", "999", 506, 64873, "公办"],
+        ["厦门医学院", "600", 505, 65653, "公办"],
+        ["福建技术师范学院", "500", 504, 66452, "公办"],
+        ["闽南师范大学(闽台合作办学)", "999", 504, 66452, "公办"],
+        ["宁德师范学院", "500", 503, 67246, "公办"],
+        ["莆田学院(面向莆田)", "999", 503, 67246, "公办"],
+        ["福建江夏学院(闽台合作办学)", "999", 502, 67989, "公办"],
+        ["宁德师范学院", "999", 502, 67989, "公办"],
+        ["福建商学院", "500", 499, 70339, "公办"],
+        ["三明学院", "500", 499, 70339, "公办"],
+        ["福建技术师范学院", "999", 498, 71202, "公办"],
+        ["福建中医药大学(中外合作)", "600", 498, 71202, "公办"],
+        ["宁德师范学院", "600", 498, 71202, "公办"],
+        ["三明学院(闽台合作办学)", "999", 498, 71202, "公办"],
+        ["闽江大学(中外合作)", "500", 497, 72041, "公办"],
+        ["莆田学院", "600", 497, 72041, "公办"],
+        ["龙岩学院", "999", 496, 72818, "公办"],
+        ["三明学院", "999", 496, 72818, "公办"],
+        ["龙岩学院", "500", 495, 73670, "公办"],
+        ["泉州师范学院(闽台合作办学)", "500", 495, 73670, "公办"],
+        ["黎明职业大学", "999", 494, 74485, "公办"],
+        ["莆田学院(闽台合作办学)", "600", 494, 74485, "公办"],
+        ["武夷学院", "999", 494, 74485, "公办"],
+        ["福建商学院(闽台合作办学)", "500", 493, 75303, "公办"],
+        ["宁德师范学院(面向宁德)", "500", 493, 75303, "公办"],
+        ["龙岩学院(面向龙岩)", "500", 492, 76112, "公办"],
+        ["龙岩学院(面向龙岩)", "999", 492, 76112, "公办"],
+        ["宁德师范学院(面向宁德)", "999", 492, 76112, "公办"],
+        ["福建商学院", "999", 491, 76979, "公办"],
+        ["武夷学院", "500", 491, 76979, "公办"],
+        ["三明学院(国际课程教育项目)", "999", 490, 77780, "公办"],
+        ["福建技术师范学院(闽台合作)", "500", 489, 78616, "公办"],
+        ["宁德师范学院(面向宁德)", "600", 489, 78616, "公办"],
+        ["莆田学院(面向莆田)", "600", 488, 79451, "公办"],
+        ["三明学院(面向三明)", "500", 488, 79451, "公办"],
+        ["武夷学院(面向南平)", "500", 488, 79451, "公办"],
+        ["武夷学院(面向南平)", "999", 488, 79451, "公办"],
+        ["宁德师范学院(闽台合作办学)", "500", 487, 80259, "公办"],
+        ["泉州师范学院(闽台合作办学)", "999", 486, 81079, "公办"],
+        ["三明学院(面向三明)", "999", 486, 81079, "公办"],
+        ["武夷学院(闽台合作办学)", "500", 486, 81079, "公办"],
+        ["宁德师范学院(闽台合作办学)", "999", 485, 81945, "公办"],
+        ["厦门大学嘉庚学院", "500", 485, 81945, "民办"],
+        ["福建江夏学院(国际教育课程项目)", "999", 484, 82760, "公办"],
+        ["武夷学院(闽台合作办学)", "999", 484, 82760, "公办"],
+        ["福建商学院(闽台合作办学)", "999", 483, 83635, "公办"],
+        ["三明学院(闽台合作办学)", "500", 483, 83635, "公办"],
+        ["集美大学诚毅学院", "999", 482, 84464, "民办"],
+        ["厦门大学嘉庚学院", "999", 482, 84464, "民办"],
+          ],
+        },
+        2024: {
+          source: '福建省教育考试院 2024 院校专业组投档最低分 + 2024 一分一段表',
+          coverage: '109 个专业组（省内高校）',
+          rows: [
+        ["厦门大学", "500", 643, 3883, ""],
+        ["厦门大学", "700", 635, 5382, ""],
+        ["福建医科大学(临床医学5+3一体化)", "516", 631, 6263, ""],
+        ["厦门大学", "999", 625, 7775, ""],
+        ["福州大学", "500", 610, 12272, ""],
+        ["福州大学", "900", 602, 15214, ""],
+        ["福州大学", "999", 596, 17567, ""],
+        ["福建师范大学", "500", 588, 20900, ""],
+        ["福州大学(地矿专业)", "500", 585, 22283, ""],
+        ["华侨大学", "500", 585, 22283, ""],
+        ["华侨大学", "500", 584, 22733, ""],
+        ["福建师范大学", "900", 583, 23205, ""],
+        ["福建师范大学", "516", 575, 27074, ""],
+        ["福建师范大学", "999", 573, 28051, ""],
+        ["集美大学", "900", 567, 31164, ""],
+        ["华侨大学", "999", 566, 31741, ""],
+        ["福建师范大学", "500", 566, 31741, ""],
+        ["福建师范大学", "500", 564, 32744, ""],
+        ["福建农林大学", "600", 561, 34414, ""],
+        ["集美大学", "500", 561, 34414, ""],
+        ["福建农林大学", "500", 561, 34414, ""],
+        ["福建农林大学", "999", 555, 37896, ""],
+        ["集美大学", "999", 554, 38488, ""],
+        ["福建理工大学", "500", 553, 39076, ""],
+        ["福建医科大学", "999", 552, 39636, ""],
+        ["集美大学", "516", 552, 39636, ""],
+        ["厦门理工学院", "500", 550, 40868, ""],
+        ["莆田学院", "500", 548, 42063, ""],
+        ["福建医科大学", "500", 548, 42063, ""],
+        ["福建理工大学", "999", 546, 43307, ""],
+        ["厦门理工学院(国际课程项目)", "500", 543, 45135, ""],
+        ["厦门理工学院", "999", 543, 45135, ""],
+        ["闽江学院", "500", 541, 46438, ""],
+        ["闽南师范大学", "500", 540, 47105, ""],
+        ["福建医科大学", "516", 539, 47758, ""],
+        ["福建中医药大学", "600", 535, 50348, ""],
+        ["闽南师范大学", "600", 535, 50348, ""],
+        ["福建中医药大学", "500", 534, 51009, ""],
+        ["闽江学院", "900", 533, 51659, ""],
+        ["泉州师范学院", "500", 532, 52309, ""],
+        ["福建警察学院", "500", 532, 52309, ""],
+        ["福建中医药大学", "999", 532, 52309, ""],
+        ["泉州师范学院", "500", 531, 53005, ""],
+        ["泉州师范学院", "900", 530, 53643, ""],
+        ["闽江学院", "999", 530, 53643, ""],
+        ["闽南师范大学", "999", 530, 53643, ""],
+        ["福建警察学院", "999", 529, 54317, ""],
+        ["福建江夏学院", "500", 529, 54317, ""],
+        ["福建江夏学院", "999", 527, 55690, ""],
+        ["厦门医学院", "999", 527, 55690, ""],
+        ["厦门理工学院(国际课程项目)", "999", 526, 56371, ""],
+        ["厦门医学院", "600", 525, 57031, ""],
+        ["莆田学院", "500", 525, 57031, ""],
+        ["泉州师范学院", "999", 524, 57726, ""],
+        ["莆田学院", "999", 520, 60414, ""],
+        ["厦门医学院", "500", 519, 61072, ""],
+        ["宁德师范学院", "500", 519, 61072, ""],
+        ["宁德师范学院", "999", 518, 61809, ""],
+        ["龙岩学院", "500", 517, 62513, ""],
+        ["三明学院", "500", 515, 63917, ""],
+        ["宁德师范学院", "600", 514, 64612, ""],
+        ["莆田学院", "600", 514, 64612, ""],
+        ["龙岩学院", "999", 514, 64612, ""],
+        ["武夷学院", "500", 513, 65358, ""],
+        ["武夷学院", "999", 511, 66723, ""],
+        ["三明学院", "999", 511, 66723, ""],
+        ["闽江学院(国际课程项目)", "999", 510, 67396, ""],
+        ["福建技术师范学院", "500", 510, 67396, ""],
+        ["福建商学院", "500", 509, 68125, ""],
+        ["福建技术师范学院", "999", 508, 68839, ""],
+        ["福建商学院", "999", 507, 69553, ""],
+        ["闽南师范大学(中美合作)", "999", 505, 70941, ""],
+        ["三明学院(国际课程项目)", "999", 503, 72303, ""],
+        ["厦门大学嘉庚学院", "500", 499, 75172, ""],
+        ["厦门大学嘉庚学院", "999", 496, 77370, ""],
+        ["集美大学诚毅学院", "999", 495, 78091, ""],
+        ["福州大学至诚学院", "999", 495, 78091, ""],
+        ["福建师范大学协和学院", "500", 492, 80189, ""],
+        ["福州大学至诚学院", "500", 491, 80905, ""],
+        ["福建江夏学院(国际课程项目)", "999", 491, 80905, ""],
+        ["集美大学诚毅学院", "500", 489, 82317, ""],
+        ["福建师范大学协和学院", "999", 489, 82317, ""],
+        ["福建农林大学金山学院", "999", 487, 83805, ""],
+        ["福建农林大学金山学院", "600", 486, 84575, ""],
+        ["福建农林大学金山学院", "500", 485, 85282, ""],
+        ["仰恩大学", "999", 481, 88307, ""],
+        ["仰恩大学", "500", 481, 88307, ""],
+        ["闽南师范大学(中美合作)", "500", 481, 88307, ""],
+        ["三明学院(国际课程项目)", "500", 480, 89052, ""],
+        ["福建师范大学协和学院(国际课程项目)", "999", 480, 89052, ""],
+        ["泉州信息工程学院", "999", 472, 94957, ""],
+        ["闽南科技学院", "500", 469, 97175, ""],
+        ["泉州信息工程学院", "500", 469, 97175, ""],
+        ["闽南科技学院", "999", 469, 97175, ""],
+        ["福州外语外贸学院", "999", 466, 99331, ""],
+        ["福州外语外贸学院", "500", 463, 101508, ""],
+        ["厦门工学院", "999", 460, 103692, ""],
+        ["泉州职业技术大学", "999", 459, 104452, ""],
+        ["闽南理工学院", "500", 459, 104452, ""],
+        ["厦门华厦学院", "500", 458, 105117, ""],
+        ["厦门华厦学院", "999", 457, 105796, ""],
+        ["闽南理工学院", "999", 455, 107215, ""],
+        ["阳光学院", "999", 454, 107964, ""],
+        ["福州工商学院", "999", 452, 109388, ""],
+        ["福州理工学院", "999", 451, 110142, ""],
+        ["厦门工学院", "500", 450, 110841, ""],
+        ["福州理工学院", "500", 449, 111573, ""],
+        ["阳光学院", "500", 449, 111573, ""],
+        ["福州工商学院", "500", 449, 111573, ""],
+          ],
+        },
+      },
+    },
+  });
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+
+</script>
+<script>
+(function (root) {
+  'use strict';
+
+/* chart.js — 纯函数，输入数据，吐出 SVG 字符串（不碰 DOM，方便测试）
+ *
+ * 画布按手机宽度设计（380×300），放在页面上最多放大到 480px，
+ * 导出长图时再整体放大，所以字号不会糊。
+ */
+
+const W = 320;
+const H = 260;
+const PAD = { l: 38, r: 10, t: 12, b: 38 };
+
+const f = (n, d = 1) => Number(n).toFixed(d);
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+const LIGHT = {
+  bg: '#ffffff',
+  grid: '#eceef4',
+  gridSoft: '#f4f5f9',
+  axisText: '#8b90a0',
+  axisTitle: '#9aa0b0',
+  curve: '#3b6ef5',
+  line: '#e5484d',
+  ok: '#0f9d58',
+  warn: '#d98400',
+  ink: '#1c2030',
+  sub: '#9aa0b0',
+};
+
+/** 分数刻度：保证 10 的倍数，且落在 4~6 条之间 */
+function scoreStep(span) {
+  for (const st of [10, 20, 25, 50, 100, 200]) {
+    if (span / st <= 5) return st;
+  }
+  return 200;
+}
+
+function chartSVG({ model, result, theme, inner = false }) {
+  const t = { ...LIGHT, ...(theme || {}) };
+  const { params, scoreAtProvince } = model;
+  const { gk } = params;
+
+  const xMax = Math.min(120000, Math.max(70000, Math.ceil((result.rankWorst * 1.25) / 10000) * 10000));
+  const pw = W - PAD.l - PAD.r;
+  const ph = H - PAD.t - PAD.b;
+
+  const focus = [result.scoreBest, result.scoreWorst, gk.lineScore, model.cityScore];
+  let yMin = Math.floor((Math.min(...focus) - 24) / 10) * 10;
+  let yMax = Math.ceil((Math.max(...focus) + 24) / 10) * 10;
+  if (yMax - yMin < 80) {
+    const mid = (yMax + yMin) / 2;
+    yMin = Math.floor((mid - 40) / 10) * 10;
+    yMax = Math.ceil((mid + 40) / 10) * 10;
+  }
+
+  const px = (r) => PAD.l + (Math.min(Math.max(r, 0), xMax) / xMax) * pw;
+  const py = (s) => PAD.t + (1 - (s - yMin) / (yMax - yMin)) * ph;
+
+  const out = [];
+  if (!inner) {
+    out.push(
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="模考位次到高考等效分的换算曲线">`,
+      `<rect x="0" y="0" width="${W}" height="${H}" fill="${t.bg}"/>`
+    );
+  }
+
+  // 分数刻度
+  out.push(`<text x="${PAD.l - 8}" y="${PAD.t - 4}" text-anchor="end" font-size="9.5" fill="${t.axisTitle}">分</text>`);
+  const yStep = scoreStep(yMax - yMin);
+  for (let v = Math.ceil(yMin / yStep) * yStep; v <= yMax; v += yStep) {
+    const y = py(v);
+    out.push(`<line x1="${PAD.l}" y1="${f(y)}" x2="${PAD.l + pw}" y2="${f(y)}" stroke="${t.grid}"/>`);
+    out.push(`<text x="${PAD.l - 6}" y="${f(y + 3.5)}" text-anchor="end" font-size="10.5" fill="${t.axisText}">${v}</text>`);
+  }
+
+  // 位次刻度
+  for (let v = 0; v <= xMax; v += 20000) {
+    const x = px(v);
+    out.push(`<line x1="${f(x)}" y1="${PAD.t}" x2="${f(x)}" y2="${PAD.t + ph}" stroke="${t.gridSoft}"/>`);
+    out.push(
+      `<text x="${f(x)}" y="${PAD.t + ph + 13}" text-anchor="middle" font-size="10.5" fill="${t.axisText}">${v === 0 ? '0' : (v / 10000).toFixed(0) + '万'}</text>`
+    );
+  }
+  out.push(
+    `<text x="${PAD.l + pw / 2}" y="${H - 5}" text-anchor="middle" font-size="10.5" fill="${t.axisTitle}">全省等效位次</text>`
+  );
+
+  // 曲线
+  const pts = [];
+  for (let i = 0; i <= 200; i++) {
+    const r = (xMax * i) / 200;
+    const s = scoreAtProvince(r);
+    if (s >= yMin - 20 && s <= yMax + 20) pts.push(`${f(px(r))},${f(py(s))}`);
+  }
+  if (pts.length > 1) {
+    out.push(`<polyline points="${pts.join(' ')}" fill="none" stroke="${t.curve}" stroke-width="2.4" stroke-linejoin="round"/>`);
+  }
+
+  // 省特控线
+  const xl = px(gk.lineRank);
+  const yl = py(gk.lineScore);
+  out.push(
+    `<line x1="${f(xl)}" y1="${PAD.t}" x2="${f(xl)}" y2="${PAD.t + ph}" stroke="${t.line}" stroke-width="1.4" stroke-dasharray="4 3"/>`,
+    `<circle cx="${f(xl)}" cy="${f(yl)}" r="3.6" fill="${t.line}"/>`,
+    `<text x="${f(xl - 4)}" y="${PAD.t + 9}" text-anchor="end" font-size="10" fill="${t.line}">特控线 ${gk.lineScore}</text>`
+  );
+
+  // 考生
+  const c = result.online ? t.ok : t.warn;
+  const cx = px(result.rankProv);
+  const cy = py(result.scoreProv);
+  const left = result.rankProv < gk.lineRank;
+  const tx = left ? cx - 10 : cx + 10;
+  const anchor = left ? 'end' : 'start';
+  out.push(
+    `<rect x="${f(px(result.rankBest))}" y="${PAD.t}" width="${f(Math.max(px(result.rankWorst) - px(result.rankBest), 2))}" height="${ph}" fill="${c}" opacity="0.12"/>`,
+    `<circle cx="${f(cx)}" cy="${f(cy)}" r="9" fill="${c}" opacity="0.16"/>`,
+    `<circle cx="${f(cx)}" cy="${f(cy)}" r="4.6" fill="${c}"/>`,
+    `<text x="${f(tx)}" y="${f(cy - 6)}" text-anchor="${anchor}" font-size="10.5" font-weight="600" fill="${c}">${esc(result.input.name || '你')}</text>`,
+    `<text x="${f(tx)}" y="${f(cy + 7)}" text-anchor="${anchor}" font-size="10" fill="${c}">${Math.round(result.scoreProv)} 分</text>`
+  );
+
+  if (!inner) out.push('</svg>');
+  return out.join('');
+}
+
+  root.SC = Object.assign(root.SC || {}, {
+    chartSVG,
+  });
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+
+</script>
+<script>
+(function (root) {
+  'use strict';
+
+  const { chartSVG } = root.SC;
+
+/* export.js — 生成一张可分享的长图（SVG → canvas → PNG），无第三方依赖 */
+
+
+const W = 720;
+const H = 1060;
+
+const CARD_THEME = {
+  bg: '#ffffff',
+  ink: '#12151c',
+  ink2: '#3c4353',
+  muted: '#6b7280',
+  dim: '#9aa0b0',
+  line: '#e7e9f1',
+  grid: '#eceef4',
+  gridSoft: '#f4f5f9',
+  accent: '#3b6ef5',
+  axisText: '#8b90a0',
+  axisTitle: '#9aa0b0',
+  curve: '#3b6ef5',
+  lineColor: '#e5484d',
+  ok: '#0f9d58',
+  warn: '#d98400',
+  sub: '#9aa0b0',
+};
+
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+function text(x, y, str, { size = 14, fill = CARD_THEME.ink, weight = 400, anchor = 'start' } = {}) {
+  return `<text x="${x}" y="${y}" font-size="${size}" font-weight="${weight}" fill="${fill}" text-anchor="${anchor}">${esc(str)}</text>`;
+}
+
+/** 拼出分享长图（浅色固定配色，便于发出去看） */
+function buildCardSVG({ model, result, dateStr }) {
+  const { params } = model;
+  const gk = params.gk;
+  const name = result.input.name || '考生';
+  const ok = result.online;
+  const accent = ok ? CARD_THEME.ok : CARD_THEME.warn;
+
+  // 图：内嵌一份（坐标系 880×420）
+  const inner = chartSVG({
+    model,
+    result,
+    inner: true,
+    theme: {
+      bg: '#ffffff',
+      grid: CARD_THEME.grid,
+      gridSoft: CARD_THEME.gridSoft,
+      axisText: CARD_THEME.axisText,
+      axisTitle: CARD_THEME.axisTitle,
+      curve: CARD_THEME.curve,
+      line: CARD_THEME.lineColor,
+      ok: CARD_THEME.ok,
+      warn: CARD_THEME.warn,
+      ink: CARD_THEME.ink,
+      sub: CARD_THEME.sub,
+    },
+  });
+
+  const stats = [
+    ['全省等效位次', `${Math.round(result.rankProv).toLocaleString('zh-CN')} 名`],
+    ['与特控线相比', `${result.delta >= 0 ? '+' : ''}${Math.round(result.delta)} 分`],
+    ['市内百分位', `前 ${(result.topPct * 100).toFixed(1)}%`],
+    ['模考市线', `${Math.round(model.cityScore)} 分 · 第 ${Math.round(model.lineRankMock).toLocaleString('zh-CN')} 名`],
+  ];
+
+  const out = [];
+  out.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif">`);
+  out.push(`<rect width="${W}" height="${H}" fill="${CARD_THEME.bg}"/>`);
+  out.push(`<rect x="0" y="0" width="${W}" height="8" fill="${CARD_THEME.accent}"/>`);
+
+  out.push(text(44, 62, '模考 → 高考 换算结果', { size: 26, weight: 700 }));
+  out.push(
+    text(44, 90, `宁德物理类 · 市上线率下调 ${(params.dropPp * 100).toFixed(1)} 个百分点`, {
+      size: 14,
+      fill: CARD_THEME.muted,
+    })
+  );
+
+  // 大字
+  out.push(text(44, 196, `${Math.round(result.scoreProv)}`, { size: 104, weight: 700, fill: CARD_THEME.ink }));
+  out.push(text(208, 196, '分', { size: 24, fill: CARD_THEME.muted }));
+  if (result.scoreInferred) {
+    out.push(text(240, 196, '（由位次反推）', { size: 13, fill: CARD_THEME.dim }));
+  }
+
+  out.push(
+    text(
+      44,
+      238,
+      `${name}：模考 ${result.score} 分 / 第 ${Math.round(result.rank).toLocaleString('zh-CN')} 名${result.rankInferred ? '（位次反推）' : ''}`,
+      { size: 16, fill: CARD_THEME.ink2 }
+    )
+  );
+  out.push(
+    text(44, 266, `${result.delta >= 0 ? '高于' : '低于'}特控线 ${Math.abs(Math.round(result.delta))} 分（${gk.lineScore}）`, {
+      size: 17,
+      weight: 650,
+      fill: accent,
+    })
+  );
+
+  // 四个指标
+  const cols = [44, 380];
+  stats.forEach(([k, v], i) => {
+    const x = cols[i % 2];
+    const y = 316 + Math.floor(i / 2) * 62;
+    out.push(text(x, y, k, { size: 12, fill: CARD_THEME.dim }));
+    out.push(text(x, y + 26, v, { size: 21, weight: 650 }));
+  });
+
+  // 分隔线 + 图
+  out.push(`<line x1="44" y1="432" x2="${W - 44}" y2="432" stroke="${CARD_THEME.line}"/>`);
+  out.push(`<svg x="80" y="440" width="560" height="455" viewBox="0 0 320 260">${inner}</svg>`);
+
+  // 底部说明
+  out.push(text(44, 930, '位次口径换算（市上线率比全省低 5~7 个百分点），仅供定位参考，不替代志愿填报决策。', {
+    size: 11.5,
+    fill: CARD_THEME.dim,
+  }));
+  out.push(
+    text(44, 962, `模考市线 ${model.cityScore.toFixed(1)} 分 · 倍率 ×${model.k.toFixed(2)} · 平移 +${model.offset.toFixed(1)} 分`, {
+      size: 12.5,
+      fill: CARD_THEME.muted,
+    })
+  );
+  out.push(text(44, 986, `区间 ${Math.round(result.scoreWorst)}–${Math.round(result.scoreBest)} 分`, { size: 12.5, fill: CARD_THEME.muted }));
+  out.push(text(44, 1030, dateStr || '', { size: 11.5, fill: CARD_THEME.dim }));
+
+  out.push('</svg>');
+  return out.join('');
+}
+
+function loadImage(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('SVG 载入失败'));
+    img.src = url;
+  });
+}
+
+function saveBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+/** SVG → PNG 下载；失败则退化成下载 SVG */
+async function downloadCard(svg, filenameBase = '换算结果', scale = 2) {
+  const svgBlob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(svgBlob);
+  try {
+    const img = await loadImage(url);
+    const canvas = document.createElement('canvas');
+    canvas.width = W * scale;
+    canvas.height = H * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const png = await new Promise((res) => canvas.toBlob(res, 'image/png'));
+    if (!png) throw new Error('toBlob 失败');
+    saveBlob(png, `${filenameBase}.png`);
+    return 'png';
+  } catch (e) {
+    saveBlob(svgBlob, `${filenameBase}.svg`);
+    return 'svg';
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+  root.SC = Object.assign(root.SC || {}, {
+    buildCardSVG,
+    downloadCard,
+  });
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+
+</script>
+<script>
+(function (root) {
+  'use strict';
+
+  const { DEFAULT_PARAMS, SAMPLES, makeModel, convert, lookupTable } = root.SC;
+  const { chartSVG } = root.SC;
+  const { buildCardSVG, downloadCard } = root.SC;
+  const { recommendGroups, ADMISSIONS, BUILD } = root.SC;
+
+/* ui.js — DOM 绑定与渲染；算法在 core.js，长图在 export.js */
+
+
+
+
+const $ = (id) => document.getElementById(id);
+
+const el = {
+  name: $('in-name'),
+  score: $('in-score'),
+  rank: $('in-rank'),
+  drop: $('in-drop'),
+  outDrop: $('out-drop'),
+  outRate: $('out-rate'),
+  outProv: $('out-prov'),
+  err: $('error'),
+  badge: $('badge'),
+  resScore: $('res-score'),
+  resDelta: $('res-delta'),
+  resRange: $('res-range'),
+  stats: $('stats'),
+  recSub: $('rec-sub'),
+  recReach: $('rec-reach'),
+  recSafe: $('rec-safe'),
+  recNote: $('rec-note'),
+  chain: $('chain'),
+  chainNote: $('chain-note'),
+  chart: $('chart'),
+  chartSub: $('chart-sub'),
+  steps: $('steps'),
+  compareBody: $('compare-table').querySelector('tbody'),
+  lookupBody: $('lookup-table').querySelector('tbody'),
+  importText: $('import-text'),
+  btn: {
+    add: $('btn-add'),
+    copy: $('btn-copy'),
+    export: $('btn-export'),
+    reset: $('btn-reset'),
+    theme: $('btn-theme'),
+    clear: $('btn-clear'),
+    import: $('btn-import'),
+  },
+};
+
+const PARAM_IDS = [
+  'p-mock-total', 'p-mock-line-score', 'p-mock-line-rank',
+  'p-gk-total', 'p-gk-line-score', 'p-gk-line-rank',
+];
+
+const STORE = { compare: 'sc.compare.v1', theme: 'sc.theme.v1' };
+
+const fmtInt = (n) => Math.round(n).toLocaleString('zh-CN');
+const fmt1 = (n) => (Math.round(n * 10) / 10).toFixed(1);
+const pct = (x, d = 1) => (x * 100).toFixed(d) + '%';
+const signed = (n) => (n >= 0 ? '+' : '') + Math.round(n);
+
+let compare = []; // [{name, score, rank}]
+
+/* ---------- 存取 ---------- */
+
+function loadStore(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+function saveStore(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* 隐私模式或 file:// 下忽略 */
+  }
+}
+
+/* ---------- 主题 ---------- */
+
+function initialTheme() {
+  try {
+    const t = localStorage.getItem(STORE.theme);
+    if (t === 'dark' || t === 'light') return t;
+  } catch {
+    /* ignore */
+  }
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  el.btn.theme.textContent = theme === 'dark' ? '☀' : '◐';
+  try {
+    localStorage.setItem(STORE.theme, theme);
+  } catch {
+    /* ignore */
+  }
+}
+
+function cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function chartTheme() {
+  return {
+    bg: cssVar('--card'),
+    grid: cssVar('--line'),
+    gridSoft: cssVar('--line-soft'),
+    axisText: cssVar('--dim'),
+    axisTitle: cssVar('--dim'),
+    curve: cssVar('--accent'),
+    line: cssVar('--red'),
+    ok: cssVar('--green'),
+    warn: cssVar('--amber'),
+    ink: cssVar('--ink'),
+    sub: cssVar('--muted'),
+  };
+}
+
+/* ---------- 输入 ---------- */
+
+function readParams() {
+  const n = (id) => Number($(id).value);
+  return {
+    mock: { total: n('p-mock-total'), lineScore: n('p-mock-line-score'), lineRank: n('p-mock-line-rank') },
+    gk: { total: n('p-gk-total'), lineScore: n('p-gk-line-score'), lineRank: n('p-gk-line-rank') },
+    dropPp: Number(el.drop.value) / 100,
+    bandPp: DEFAULT_PARAMS.bandPp,
+  };
+}
+
+function currentInput() {
+  return {
+    name: (el.name.value || '你').trim(),
+    score: el.score.value,
+    rank: el.rank.value,
+  };
+}
+
+/* ---------- 渲染 ---------- */
+
+function render() {
+  let params, model, result;
+  try {
+    params = readParams();
+    model = makeModel(params);
+    result = convert(currentInput(), params, model);
+    result.input.name = currentInput().name || '你';
+    hideError();
+  } catch (e) {
+    showError(e.message);
+    return;
+  }
+
+  const gk = params.gk;
+  const fill = (Number(el.drop.value) / 10) * 100;
+  el.drop.style.setProperty('--fill', `${fill}%`);
+  el.outDrop.textContent = fmt1(Number(el.drop.value));
+  el.outRate.textContent = `市 ${pct(model.rate)}`;
+  el.outProv.textContent = pct(gk.lineRank / gk.total);
+
+  el.resScore.textContent = Math.round(result.scoreProv);
+  el.resDelta.textContent =
+    (result.delta >= 0 ? '高于特控线 ' : '低于特控线 ') + Math.abs(Math.round(result.delta)) + ' 分';
+  el.resRange.textContent = `区间 ${Math.round(result.scoreWorst)} – ${Math.round(result.scoreBest)} 分`;
+  el.badge.textContent = result.online ? '上线' : '未上线';
+  el.badge.classList.toggle('off', !result.online);
+
+  const cells = [
+    ['模考位次', `${fmtInt(result.rank)}<small>${result.rankInferred ? '由分数反推' : '名'}</small>`],
+    ['全省等效位次', `${fmtInt(result.rankProv)}<small>名</small>`],
+    ['与特控线', `<span class="${result.delta >= 0 ? 'pos' : 'neg'}">${signed(result.delta)}</span><small>分</small>`],
+    ['市内百分位', `${pct(result.topPct)}<small>市线 ${pct(model.rate)}</small>`],
+    ['距市线', `${result.gapRank >= 0 ? '领先 ' : '落后 '}${fmtInt(Math.abs(result.gapRank))}<small>名</small>`],
+    ['模考市线', `${Math.round(model.cityScore)}<small>分 · 第 ${fmtInt(model.lineRankMock)} 名</small>`],
+  ];
+  el.stats.innerHTML = cells.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+
+  const chainBits = [
+    `模考 <b>${result.score}</b> 分${result.scoreInferred ? '<span class="inferred">反推</span>' : ''}`,
+    `第 <b>${fmtInt(result.rank)}</b> 名${result.rankInferred ? '<span class="inferred">反推</span>' : ''}`,
+    `全省 <b>${fmtInt(result.rankProv)}</b> 名`,
+    `<b>${Math.round(result.scoreProv)}</b> 分`,
+  ];
+  el.chain.innerHTML = chainBits.map((t, i) => (i ? `<i>→</i><span>${t}</span>` : `<span>${t}</span>`)).join('');
+
+  if (result.extrapolated) {
+    el.chainNote.hidden = false;
+    el.chainNote.textContent = `分数不在已知锚点 ${result.range.low}–${result.range.high} 分内，位次按端点斜率外推，误差较大`;
+  } else {
+    el.chainNote.hidden = true;
+  }
+
+  el.chart.innerHTML = chartSVG({ model, result, theme: chartTheme() });
+  el.chartSub.textContent = `倍率 ×${model.k.toFixed(2)}，平移 +${model.offset.toFixed(1)} 分，市线第 ${fmtInt(model.lineRankMock)} 名`;
+
+  renderRec(result);
+  renderCompare(model);
+  renderLookup(model, result);
+  renderSteps(params, model, result);
+  syncURL(params, result);
+}
+
+
+function renderRec(result) {
+  const data = ADMISSIONS;
+  if (!data || !data.tables) {
+    el.recSub.textContent = '尚未导入院校数据';
+    el.recNote.textContent = '';
+    el.recReach.innerHTML = '<li class="rec-empty">无数据</li>';
+    el.recSafe.innerHTML = '<li class="rec-empty">无数据</li>';
+    return;
+  }
+  const rec = recommendGroups(result.rankProv, data);
+  el.recSub.textContent = `你换算后的省位次是第 ${fmtInt(result.rankProv)} 名，按各专业组最近一年的投档位次对照`;
+  const perYear = Object.keys(data.tables)
+    .sort()
+    .reverse()
+    .map((y) => `${y} 年 ${data.tables[y].rows.length} 组`)
+    .join(' · ');
+  el.recNote.textContent =
+    `已收录：${perYear}；参与排序 ${rec.total} 个专业组（只用最近两年有数据的组），按各组最新一年位次排。` +
+    '投档线是专业组最低分，组内热门专业实际要更高；数据仅供定位，填报前务必核对官方计划本。';
+  fillRecList(el.recReach, rec.reach, result, 'reach');
+  fillRecList(el.recSafe, rec.safe, result, 'safe');
+}
+
+function fillRecList(ul, items, result, kind) {
+  if (!items.length) {
+    ul.innerHTML = '<li class="rec-empty">这一段还没有收录数据</li>';
+    return;
+  }
+  ul.innerHTML = items
+    .map((g) => {
+      const dRank = g.rank - result.rankProv;
+      const dScore = Math.round(result.scoreProv - g.score);
+      const other = [2026, 2025, 2024]
+        .filter((y) => y !== g.latestYear)
+        .map((y) => `${y} ${g.years[y] ? g.years[y].score : '—'}`)
+        .join(' · ');
+      return `<li>
+        <div class="n">${escapeHtml(g.school)} <span class="grp">组${g.group}</span></div>
+        <div class="m">${g.latestYear} 投档 ${g.score} 分 · 第 ${fmtInt(g.rank)} 名</div>
+        <div class="d ${kind === 'reach' ? 'neg' : 'pos'}">位次差 ${dRank > 0 ? '+' : ''}${fmtInt(dRank)} · 分数差 ${dScore > 0 ? '+' : ''}${dScore}</div>
+        <div class="h">往年 ${other}</div>
+      </li>`;
+    })
+    .join('');
+}
+
+function renderCompare(model) {
+  if (!compare.length) {
+    el.compareBody.innerHTML = '<tr><td colspan="6" class="empty">还没有人，点上面的「＋ 加入对比」</td></tr>';
+    return;
+  }
+  const rows = compare
+    .map((p, idx) => ({ p, idx, r: convert({ score: p.score, rank: p.rank ?? '' }, model.params, model) }))
+    .sort((a, b) => a.r.rankProv - b.r.rankProv);
+
+  el.compareBody.innerHTML = rows
+    .map(({ p, idx, r }) => {
+      const me =
+        String(p.score) === String(el.score.value) &&
+        String(p.rank ?? '') === String(el.rank.value);
+      return `<tr class="${me ? 'me ' : ''}tap" data-i="${idx}">
+        <td>${escapeHtml(p.name)}</td>
+        <td>${r.score} / ${fmtInt(r.rank)}${r.rankInferred ? '<span class="inferred">反推</span>' : ''}</td>
+        <td>${fmtInt(r.rankProv)}</td>
+        <td><b>${Math.round(r.scoreProv)}</b></td>
+        <td class="${r.delta >= 0 ? 'pos' : 'neg'}">${signed(r.delta)}</td>
+        <td><button class="del" data-del="${idx}" aria-label="删除">✕</button></td>
+      </tr>`;
+    })
+    .join('');
+}
+
+function renderLookup(model, result) {
+  const rows = lookupTable(model);
+  el.lookupBody.innerHTML = rows
+    .map((r) => {
+      const me = Math.abs(r.score - result.score) < 0.5;
+      return `<tr class="${me ? 'me ' : ''}tap" data-score="${r.score}" data-rank="${Math.round(r.rank)}">
+        <td>${r.score}</td>
+        <td>${fmtInt(r.rank)}</td>
+        <td>${fmtInt(r.rankProv)}</td>
+        <td><b>${Math.round(r.scoreProv)}</b></td>
+        <td class="${r.delta >= 0 ? 'pos' : 'neg'}">${signed(r.delta)}</td>
+      </tr>`;
+    })
+    .join('');
+}
+
+function renderSteps(params, model, result) {
+  const { mock, gk, dropPp } = params;
+  const items = [
+    `市上线率 = 省 <code>${pct(gk.lineRank / gk.total, 2)}</code> − <code>${fmt1(dropPp * 100)}pp</code> = <b>${pct(model.rate, 2)}</b>`,
+    `模考市线 = <code>${pct(model.rate, 2)} × ${fmtInt(mock.total)}</code> = <b>第 ${fmtInt(model.lineRankMock)} 名</b> → 模考 <b>${model.cityScore.toFixed(1)} 分</b>（官方划的是 ${mock.lineScore} 分 / 第 ${fmtInt(mock.lineRank)} 名）`,
+    `倍率 = <code>${fmtInt(gk.lineRank)} ÷ ${fmtInt(model.lineRankMock)}</code> = <b>×${model.k.toFixed(2)}</b> → ${fmtInt(result.rank)} 名 ≈ 全省 <b>${fmtInt(result.rankProv)} 名</b>（前 ${pct(result.topPctProv)}）`,
+    `平移 = <code>${gk.lineScore} − ${model.cityScore.toFixed(1)}</code> = <b>+${model.offset.toFixed(1)} 分</b> → ${result.score} + ${model.offset.toFixed(1)} = <b>${result.scoreProv.toFixed(1)} 分</b>`,
+    `区间：下调 ${fmt1(dropPp * 100 - params.bandPp * 100)}–${fmt1(dropPp * 100 + params.bandPp * 100)} 个百分点 → <b>${Math.round(result.scoreWorst)}–${Math.round(result.scoreBest)} 分</b>`,
+  ];
+  el.steps.innerHTML = items.map((t) => `<li>${t}</li>`).join('');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+/* ---------- 交互 ---------- */
+
+function showError(msg) {
+  el.err.textContent = msg;
+  el.err.hidden = false;
+}
+function hideError() {
+  el.err.hidden = true;
+}
+
+function loadPerson(p) {
+  el.name.value = p.name;
+  el.score.value = String(p.score);
+  el.rank.value = String(p.rank);
+  render();
+}
+
+function addCurrent() {
+  let params, model, result;
+  try {
+    params = readParams();
+    model = makeModel(params);
+    result = convert(currentInput(), params, model);
+  } catch (e) {
+    showError(e.message);
+    return;
+  }
+  const p = {
+    name: currentInput().name || '你',
+    score: result.score,
+    rank: result.input.rank ? Math.round(result.input.rank) : null,
+  };
+  const dup = compare.some((c) => Number(c.rank ?? 0) === Number(p.rank ?? 0) && Number(c.score) === p.score);
+  if (dup) {
+    flash(el.btn.add, '已经在列表里');
+    return;
+  }
+  compare.push(p);
+  saveStore(STORE.compare, compare);
+  render();
+  flash(el.btn.add, '已加入');
+}
+
+const flashTimers = new WeakMap();
+
+function flash(btn, text) {
+  if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+  btn.textContent = text;
+  btn.classList.add('done');
+  clearTimeout(flashTimers.get(btn));
+  flashTimers.set(
+    btn,
+    setTimeout(() => {
+      btn.textContent = btn.dataset.label;
+      btn.classList.remove('done');
+    }, 1200)
+  );
+}
+
+function parseImport(text) {
+  const out = [];
+  for (const line of text.split(/\n+/)) {
+    const t = line.trim();
+    if (!t) continue;
+    const parts = t.split(/[\s,，、]+/).filter(Boolean);
+    if (!parts.length) continue;
+
+    const nums = parts.filter((x) => /^\d+(\.\d+)?$/.test(x)).map(Number);
+    let name = null;
+    let score = null;
+    let rank = null;
+
+    if (nums.length === parts.length) {
+      // 全是数字：至少一个
+      score = nums[0];
+      if (nums.length >= 2) rank = nums[1];
+    } else {
+      // 第一段当名字，后面取数字
+      name = parts[0];
+      const rest = parts.slice(1).filter((x) => /^\d+(\.\d+)?$/.test(x)).map(Number);
+      if (!rest.length) continue;
+      score = rest[0];
+      if (rest.length >= 2) rank = rest[1];
+    }
+    if (!Number.isFinite(score)) continue;
+    out.push({ name: name || `同学${out.length + 1}`, score, rank });
+  }
+  return out;
+}
+
+function doImport() {
+  const list = parseImport(el.importText.value);
+  if (!list.length) {
+    showError('没解析到数据，格式：姓名 分数 位次（姓名可省）');
+    return;
+  }
+  hideError();
+  let added = 0;
+  for (const p of list) {
+    if (compare.some((c) => Number(c.rank ?? 0) === Number(p.rank ?? 0) && Number(c.score) === p.score)) continue;
+    compare.push(p);
+    added++;
+  }
+  saveStore(STORE.compare, compare);
+  el.importText.value = '';
+  render();
+  flash(el.btn.import, `导入 ${added} 人`);
+}
+
+function buildText(params, model, result) {
+  const gk = params.gk;
+  return [
+    `${result.input.name || '你'}：模考 ${result.score} 分 / 第 ${fmtInt(result.rank)} 名${result.rankInferred ? '（位次由分数反推）' : ''}`,
+    `市上线率 ${pct(model.rate)}（省 ${pct(gk.lineRank / gk.total)} − ${fmt1(params.dropPp * 100)}pp）`,
+    `→ 全省等效位次约 ${fmtInt(result.rankProv)} 名`,
+    `→ 高考等效分约 ${Math.round(result.scoreProv)}（区间 ${Math.round(result.scoreWorst)}–${Math.round(result.scoreBest)}）`,
+    `→ 与特控线 ${gk.lineScore} 相比：${signed(result.delta)} 分`,
+  ].join('\n');
+}
+
+async function copyResult() {
+  let params, model, result;
+  try {
+    params = readParams();
+    model = makeModel(params);
+    result = convert(currentInput(), params, model);
+    result.input.name = currentInput().name || '你';
+  } catch (e) {
+    showError(e.message);
+    return;
+  }
+  const text = buildText(params, model, result);
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+  }
+  flash(el.btn.copy, '已复制');
+}
+
+async function exportImage() {
+  let params, model, result;
+  try {
+    params = readParams();
+    model = makeModel(params);
+    result = convert(currentInput(), params, model);
+    result.input.name = currentInput().name || '你';
+  } catch (e) {
+    showError(e.message);
+    return;
+  }
+  const svg = buildCardSVG({
+    model,
+    result,
+    dateStr: new Date().toLocaleDateString('zh-CN') + ' 生成',
+  });
+  flash(el.btn.export, '生成中…');
+  const kind = await downloadCard(svg, `${result.input.name || '换算'}-${Math.round(result.scoreProv)}分`);
+  flash(el.btn.export, kind === 'png' ? '已保存' : '已存 SVG');
+}
+
+function resetAll() {
+  const d = DEFAULT_PARAMS;
+  el.name.value = '你';
+  el.score.value = '500';
+  el.rank.value = '3100';
+  el.drop.value = String(d.dropPp * 100);
+  $('p-mock-total').value = d.mock.total;
+  $('p-mock-line-score').value = d.mock.lineScore;
+  $('p-mock-line-rank').value = d.mock.lineRank;
+  $('p-gk-total').value = d.gk.total;
+  $('p-gk-line-score').value = d.gk.lineScore;
+  $('p-gk-line-rank').value = d.gk.lineRank;
+  hideError();
+  render();
+}
+
+/* ---------- URL ---------- */
+
+function syncURL(params, result) {
+  const q = new URLSearchParams();
+  q.set('score', String(result.score));
+  if (!result.rankInferred) q.set('rank', String(result.rank));
+  q.set('drop', String(params.dropPp * 100));
+  if (result.input.name && result.input.name !== '你') q.set('name', result.input.name);
+  try {
+    history.replaceState(null, '', `?${q.toString()}`);
+  } catch {
+    /* file:// 下忽略 */
+  }
+}
+
+function loadFromURL() {
+  const q = new URLSearchParams(location.search);
+  if (q.has('name')) el.name.value = q.get('name');
+  if (q.has('score')) el.score.value = q.get('score');
+  if (q.has('rank')) el.rank.value = q.get('rank');
+  if (q.has('drop')) el.drop.value = q.get('drop');
+}
+
+
+/* ---------- 分数 / 位次 联动 ---------- */
+/* 模考分和位次是同一条曲线上的两个坐标，改一个就把另一个算出来，
+   否则改分数时下面的省位次、推荐都不会动（因为省位次只认位次）。 */
+
+function syncRankFromScore() {
+  if (el.rank.value === '') return; // 只填分数模式，别硬塞
+  const score = Number(el.score.value);
+  if (!Number.isFinite(score)) return;
+  try {
+    const model = makeModel(readParams());
+    const r = model.curve.rankAt(score, true);
+    if (Number.isFinite(r)) {
+      el.rank.value = String(Math.round(Math.min(Math.max(r, 1), model.params.mock.total)));
+    }
+  } catch {
+    /* 参数还没填好时忽略 */
+  }
+}
+
+function syncScoreFromRank() {
+  if (el.score.value === '') return; // 只填位次模式
+  const rank = Number(el.rank.value);
+  if (!Number.isFinite(rank) || rank <= 0) return;
+  try {
+    const model = makeModel(readParams());
+    const sc = model.curve.scoreAt(rank);
+    if (Number.isFinite(sc)) el.score.value = String(Math.round(sc));
+  } catch {
+    /* ignore */
+  }
+}
+
+/* ---------- 启动 ---------- */
+
+let raf = 0;
+function schedule() {
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(render);
+}
+
+applyTheme(initialTheme());
+compare = loadStore(STORE.compare, SAMPLES.map((s) => ({ ...s })));
+
+[el.name, el.drop, ...PARAM_IDS.map($)].forEach((node) => {
+  node.addEventListener('input', schedule);
+});
+el.score.addEventListener('input', () => {
+  syncRankFromScore();
+  schedule();
+});
+el.rank.addEventListener('input', () => {
+  syncScoreFromRank();
+  schedule();
+});
+
+el.btn.theme.addEventListener('click', () => {
+  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  render();
+});
+el.btn.add.addEventListener('click', addCurrent);
+el.btn.copy.addEventListener('click', copyResult);
+el.btn.export.addEventListener('click', exportImage);
+el.btn.reset.addEventListener('click', resetAll);
+el.btn.clear.addEventListener('click', () => {
+  compare = [];
+  saveStore(STORE.compare, compare);
+  render();
+});
+el.btn.import.addEventListener('click', doImport);
+
+el.compareBody.addEventListener('click', (e) => {
+  const del = e.target.closest('[data-del]');
+  if (del) {
+    compare.splice(Number(del.dataset.del), 1);
+    saveStore(STORE.compare, compare);
+    render();
+    return;
+  }
+  const tr = e.target.closest('tr[data-i]');
+  if (tr) loadPerson(compare[Number(tr.dataset.i)]);
+});
+
+el.lookupBody.addEventListener('click', (e) => {
+  const tr = e.target.closest('tr[data-rank]');
+  if (!tr) return;
+  el.score.value = tr.dataset.score;
+  el.rank.value = tr.dataset.rank;
+  render();
+});
+
+const buildEl = document.getElementById('build-info');
+if (buildEl) {
+  const cnt = Object.keys(ADMISSIONS.tables)
+    .sort()
+    .reverse()
+    .map((y) => `${y}×${ADMISSIONS.tables[y].rows.length}`)
+    .join(' / ');
+  buildEl.textContent = `数据 ${cnt} · 构建 ${BUILD}`;
+}
+
+loadFromURL();
+render();
+
+// 调试出口
+window.__demo = { render, getCompare: () => compare };
+
+  root.__SC_READY = true;
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+
+</script>
+<script>
+  // 2 秒后还没就绪，就把原因摆出来，而不是让按钮默默失效
+  setTimeout(function () {
+    if (!window.__SC_READY) {
+      var box = document.getElementById('boot-error');
+      var detail = document.getElementById('boot-detail');
+      if (box) box.hidden = false;
+      if (detail) detail.textContent = '（当前协议：' + location.protocol + '）';
+    }
+  }, 2000);
+</script>
+</body>
+</html>

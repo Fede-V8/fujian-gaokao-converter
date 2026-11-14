@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>模考 → 高考 换算器 · 宁德物理类</title>
+<meta name="description" content="按宁德市上线率（比全省低 5~7 个百分点）把模考成绩换算成全省等效位次和高考等效分。支持多人对比、快速换算表、一键存长图。" />
+<meta name="theme-color" content="#f4f6fb" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233b6ef5'/%3E%3Ctext x='16' y='23' font-size='19' fill='white' text-anchor='middle' font-family='sans-serif'%3E∑%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="./styles.css" />
+<script>
+  // 首帧就定好主题，避免浅色闪一下
+  try {
+    var saved = localStorage.getItem('sc.theme.v1');
+    document.documentElement.dataset.theme =
+      saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  } catch (e) {}
+</script>
+</head>
+<body>
+
+<noscript>
+  <div class="warn wrap" style="margin-top:10px">
+    这个页面需要 JavaScript。当前环境把它关掉了（比如被 <code>sandbox</code> 限制的预览窗口），
+    请用浏览器打开，或部署到 GitHub Pages 再看。
+  </div>
+</noscript>
+
+<div id="boot-error" class="warn wrap" hidden>
+  <b>脚本没跑起来</b>：页面停在默认数字，按钮不会响应。
+  常见原因是文件被放在不允许执行脚本的环境里（比如某些预览器、或被拦截的 iframe）。
+  用浏览器打开 <code>http://localhost:8000</code>（在 docs 目录执行
+  <code>python3 -m http.server 8000</code>），或部署到 GitHub Pages 再看。
+  <span id="boot-detail" class="dim"></span>
+</div>
+
+<header class="top">
+  <div class="wrap top-inner">
+    <div class="brand">
+      <div class="logo">∑</div>
+      <div class="brand-txt">
+        <h1>模考 → 高考 换算器</h1>
+        <p>宁德 · 物理类 · 市上线率口径</p>
+      </div>
+    </div>
+    <button id="btn-theme" class="icon-btn" type="button" aria-label="切换深浅色">◐</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ① 输入 -->
+  <section class="card" id="card-input">
+    <div class="card-head">
+      <h2>成绩</h2>
+      <p class="card-sub">改一个数，下面全部实时更新</p>
+    </div>
+
+    <div class="row2">
+      <label class="field" for="in-score">
+        <span class="label">模考分</span>
+        <span class="control">
+          <input id="in-score" type="number" inputmode="decimal" step="1" value="500" />
+          <em>分</em>
+        </span>
+      </label>
+      <label class="field" for="in-rank">
+        <span class="label">模考位次</span>
+        <span class="control">
+          <input id="in-rank" type="number" inputmode="numeric" step="1" value="3100" />
+          <em>名</em>
+        </span>
+      </label>
+    </div>
+
+    <p class="hint">只填分数或只填位次都行，另一边会在模考曲线上自动反推</p>
+
+    <div class="namerow">
+      <span>称呼</span>
+      <input id="in-name" type="text" value="你" maxlength="10" placeholder="你" autocomplete="off" />
+    </div>
+
+    <div class="field">
+      <div class="field-label">市上线率下调 <b id="out-drop">6.0</b> 个百分点</div>
+      <input id="in-drop" type="range" min="0" max="10" step="0.5" value="6" />
+      <div class="scale"><span>省 <b id="out-prov">29.0%</b></span><span id="out-rate">市 23.0%</span></div>
+    </div>
+
+    <details class="params">
+      <summary>考盘参数</summary>
+      <div class="param-grid">
+        <label>模考人数 <input id="p-mock-total" type="number" value="15000" /></label>
+        <label>模考线分 <input id="p-mock-line-score" type="number" value="466" /></label>
+        <label>模考线位次 <input id="p-mock-line-rank" type="number" value="4600" /></label>
+        <label>高考人数 <input id="p-gk-total" type="number" value="195315" /></label>
+        <label>高考线分 <input id="p-gk-line-score" type="number" value="528" /></label>
+        <label>高考线位次 <input id="p-gk-line-rank" type="number" value="58019" /></label>
+      </div>
+    </details>
+
+    <p id="error" class="error" hidden></p>
+
+    <div class="actions">
+      <button id="btn-add" class="btn primary" type="button">＋ 加入对比</button>
+      <button id="btn-copy" class="btn ghost" type="button">复制</button>
+      <button id="btn-export" class="btn ghost" type="button">存长图</button>
+    </div>
+    <button id="btn-reset" class="linkbtn" type="button">重置全部参数</button>
+  </section>
+
+  <!-- ② 结果 -->
+  <section class="card result" id="card-result">
+    <div class="hero">
+      <div class="hero-top">
+        <span class="eyebrow">高考等效分</span>
+        <span id="badge" class="badge">上线</span>
+      </div>
+      <div class="hero-num"><span id="res-score">534</span><small>分</small></div>
+      <p class="hero-sub"><span id="res-delta">高于特控线 6 分</span><span id="res-range">区间 532 – 538 分</span></p>
+      <p class="chain" id="chain"></p>
+      <p class="chain-note" id="chain-note" hidden></p>
+    </div>
+    <dl id="stats" class="stats"></dl>
+  </section>
+
+  <!-- ③ 曲线 -->
+  <section class="card" id="card-chart">
+    <div class="card-head">
+      <h2>位次 → 等效分</h2>
+      <p class="card-sub" id="chart-sub"></p>
+    </div>
+    <div id="chart" class="chart"></div>
+    <div class="legend">
+      <span><i class="dot curve"></i>换算曲线</span>
+      <span><i class="dot line"></i>省特控线</span>
+      <span><i class="bar"></i>你的区间</span>
+    </div>
+  </section>
+
+  <!-- ④ 能上 / 能冲 -->
+  <section class="card" id="card-rec">
+    <div class="card-head row">
+      <div>
+        <h2>能上 / 能冲</h2>
+        <p class="card-sub" id="rec-sub"></p>
+      </div>
+      <span class="pill">2025 投档线</span>
+    </div>
+    <div class="rec-grid">
+      <div class="rec-col reach">
+        <h3>冲 <small>比你高一点</small></h3>
+        <ol id="rec-reach" class="rec-list"></ol>
+      </div>
+      <div class="rec-col safe">
+        <h3>稳 <small>比你低一点</small></h3>
+        <ol id="rec-safe" class="rec-list"></ol>
+      </div>
+    </div>
+    <p class="rec-note" id="rec-note"></p>
+  </section>
+
+  <!-- ⑤ 多人对比 -->
+  <section class="card" id="card-compare">
+    <div class="card-head row">
+      <div>
+        <h2>多人对比</h2>
+        <p class="card-sub">点某个名字可以把它读回上面</p>
+      </div>
+      <button id="btn-clear" class="mini" type="button">清空</button>
+    </div>
+    <div class="table-wrap">
+      <table id="compare-table">
+        <thead>
+          <tr><th>名字</th><th>模考</th><th>省位次</th><th>等效分</th><th>与线</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <details class="import">
+      <summary>批量导入</summary>
+      <p class="hint">每行一个人：<code>500 3100</code>、<code>小明 500 3100</code>，或只给分数 <code>小明 507</code></p>
+      <textarea id="import-text" rows="4" spellcheck="false" placeholder="小明 500 3100&#10;小红 480 4200"></textarea>
+      <button id="btn-import" class="btn ghost" type="button">导入</button>
+    </details>
+  </section>
+
+  <!-- ⑤ 快速换算表 -->
+  <section class="card" id="card-lookup">
+    <div class="card-head">
+      <h2>快速换算表</h2>
+      <p class="card-sub">460–500 分之间的等效结果，点一行可读回上面</p>
+    </div>
+    <div class="table-wrap">
+      <table id="lookup-table">
+        <thead>
+          <tr><th>模考分</th><th>模考位次</th><th>省位次</th><th>等效分</th><th>与线</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ⑥ 方法 -->
+  <section class="card" id="card-method">
+    <details class="method" open>
+      <summary>这笔账是怎么算的</summary>
+      <ol id="steps" class="steps"></ol>
+    </details>
+    <p class="note">
+      口径提示：这里把「宁德市上线率」理解成 <b>比全省低 5~7 个百分点</b>（29.04% → 22%~24%），
+      不是相对下降 5%~7%。若你手上的官方数据不同，改滑块或考盘参数即可，整页会一起重算。
+    </p>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>数据口径：模考 15,000 人 / 466 分切 4,600 人；2026 福建物理类 195,315 人 / 特控线 528 分（累计 58,019 人）/ 本科线 446 分（累计 124,092 人），据省考试院 6·25 一分一段表。</p>
+    <p class="dim">位次是主结果，分数由你提供的模考锚点线性推出。结果仅供定位参考，不替代志愿填报决策。</p>
+    <p class="dim" id="build-info"></p>
+  </div>
+</footer>
+
+<script src="./js/core.js?v=20261115a" defer></script>
+<script src="./js/admissions.js?v=20261115a" defer></script>
+<script src="./js/chart.js?v=20261115a" defer></script>
+<script src="./js/export.js?v=20261115a" defer></script>
+<script src="./js/ui.js?v=20261115a" defer></script>
+<script>
+  // 2 秒后还没就绪，就把原因摆出来，而不是让按钮默默失效
+  setTimeout(function () {
+    if (!window.__SC_READY) {
+      var box = document.getElementById('boot-error');
+      var detail = document.getElementById('boot-detail');
+      if (box) box.hidden = false;
+      if (detail) detail.textContent = '（当前协议：' + location.protocol + '）';
+    }
+  }, 2000);
+</script>
+</body>
+</html>
