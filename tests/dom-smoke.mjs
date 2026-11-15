@@ -120,8 +120,8 @@ eq('稳的数量', ($('rec-safe').innerHTML.match(/<li>/g) || []).length, 5);
 has('冲里有福建农林大学', $('rec-reach').innerHTML, '福建农林大学');
 has('稳里有福建医科大学', $('rec-safe').innerHTML, '福建医科大学');
 eq('专业冲的数量', ($('major-reach').innerHTML.match(/<li>/g) || []).length, 5);
-has('专业里有福州大学', $('major-reach').innerHTML, '福州大学');
-has('专业副标题', $('major-sub').textContent, '福州大学');
+has('专业里有集美大学', $('major-reach').innerHTML, '集美大学');
+has('专业副标题含三校', $('major-sub').textContent, '集美大学');
 
 console.log('分数/位次联动');
 {

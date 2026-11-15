@@ -203,7 +203,7 @@ console.log('判定');
   eq('2025 全部来自 2025 表', y2025.reach.every((g) => g.years[2025]), true);
 
   const mj = recommendMajors(me.rankProv, MAJORS);
-  eq('专业 158 个', mj.total, 158);
+  eq('专业 292 个', mj.total, 292);
   eq('专业冲 5 个', mj.reach.length, 5);
   eq('稳档有 5 个', mj.safe.length, 5);
   near('冲最接近的专业位次', mj.reach[0].rank, 46854, 1);
