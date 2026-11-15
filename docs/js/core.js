@@ -305,17 +305,41 @@ function buildRecords(admissions) {
  *  冲：最近一年投档位次比你更靠前（更难），取最接近的
  *  稳：位次比你靠后（更松），取最接近的
  */
-function recommendGroups(rankProv, admissions, n = 5) {
+function recommendGroups(rankProv, admissions, n = 5, year = null) {
   const all = buildRecords(admissions);
   if (!all.length || !Number.isFinite(rankProv)) {
-    return { reach: [], safe: [], total: 0, newestYear: null };
+    return { reach: [], safe: [], total: 0, year: null };
   }
   const newestYear = Math.max(...Object.keys(admissions.tables).map(Number));
-  // 只用「最近两年」有数据的组：两年前的分数线不足以参考
-  const records = all.filter((r) => r.latestYear >= newestYear - 1);
-  const reach = records.filter((g) => g.rank < rankProv).sort((a, b) => b.rank - a.rank).slice(0, n);
+
+  let records;
+  let useYear = newestYear;
+  if (year) {
+    // 指定年份：只保留该年有数据的组，按该年位次排序
+    useYear = Number(year);
+    records = all
+      .filter((r) => r.years[useYear])
+      .map((r) => ({ ...r, score: r.years[useYear].score, rank: r.years[useYear].rank }));
+  } else {
+    // 最新口径：每组用自己最近一年的数据，且只保留最近两年有数据的组
+    records = all.filter((r) => r.latestYear >= newestYear - 1);
+  }
+
+  const reach = records.filter((g) => g.rank < rankProv).sort((a, b) => (year ? b.rank - a.rank : b.rank - a.rank)).slice(0, n);
   const safe = records.filter((g) => g.rank >= rankProv).sort((a, b) => a.rank - b.rank).slice(0, n);
-  return { reach, safe, total: records.length, skipped: all.length - records.length, newestYear };
+  return { reach, safe, total: records.length, year: year ? useYear : null, newestYear };
+}
+
+/** 按省位次给出「冲 / 稳」各 n 个专业（默认 2025 年分专业数据） */
+function recommendMajors(rankProv, majors, n = 5, year = 2025) {
+  const table = majors && majors[year];
+  if (!table || !table.rows || !table.rows.length || !Number.isFinite(rankProv)) {
+    return { reach: [], safe: [], total: 0, year, schools: [] };
+  }
+  const list = table.rows.map((r) => ({ school: r[0], group: r[1], major: r[2], score: r[3], rank: r[4] }));
+  const reach = list.filter((m) => m.rank < rankProv).sort((a, b) => b.rank - a.rank).slice(0, n);
+  const safe = list.filter((m) => m.rank >= rankProv).sort((a, b) => a.rank - b.rank).slice(0, n);
+  return { reach, safe, total: list.length, year, schools: table.schools || [] };
 }
 
   root.SC = Object.assign(root.SC || {}, {
@@ -332,6 +356,7 @@ function recommendGroups(rankProv, admissions, n = 5) {
     lookupTable,
     convert,
     recommendGroups,
+    recommendMajors,
     buildRecords,
   });
 })(typeof globalThis !== 'undefined' ? globalThis : window);

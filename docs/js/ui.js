@@ -4,7 +4,7 @@
   const { DEFAULT_PARAMS, SAMPLES, makeModel, convert, lookupTable } = root.SC;
   const { chartSVG } = root.SC;
   const { buildCardSVG, downloadCard } = root.SC;
-  const { recommendGroups, ADMISSIONS, BUILD } = root.SC;
+  const { recommendGroups, recommendMajors, ADMISSIONS, MAJORS, BUILD } = root.SC;
 
 /* ui.js — DOM 绑定与渲染；算法在 core.js，长图在 export.js */
 
@@ -28,6 +28,11 @@ const el = {
   resRange: $('res-range'),
   stats: $('stats'),
   recSub: $('rec-sub'),
+  yearSeg: $('year-seg'),
+  majorSub: $('major-sub'),
+  majorNote: $('major-note'),
+  majorReach: $('major-reach'),
+  majorSafe: $('major-safe'),
   recReach: $('rec-reach'),
   recSafe: $('rec-safe'),
   recNote: $('rec-note'),
@@ -63,6 +68,7 @@ const pct = (x, d = 1) => (x * 100).toFixed(d) + '%';
 const signed = (n) => (n >= 0 ? '+' : '') + Math.round(n);
 
 let compare = []; // [{name, score, rank}]
+let yearMode = 'latest'; // latest | 2026 | 2025 | 2024
 
 /* ---------- 存取 ---------- */
 
@@ -202,6 +208,7 @@ function render() {
   el.chartSub.textContent = `倍率 ×${model.k.toFixed(2)}，平移 +${model.offset.toFixed(1)} 分，市线第 ${fmtInt(model.lineRankMock)} 名`;
 
   renderRec(result);
+  renderMajors(result);
   renderCompare(model);
   renderLookup(model, result);
   renderSteps(params, model, result);
@@ -218,15 +225,20 @@ function renderRec(result) {
     el.recSafe.innerHTML = '<li class="rec-empty">无数据</li>';
     return;
   }
-  const rec = recommendGroups(result.rankProv, data);
-  el.recSub.textContent = `你换算后的省位次是第 ${fmtInt(result.rankProv)} 名，按各专业组最近一年的投档位次对照`;
+  const rec = recommendGroups(result.rankProv, data, 5, yearMode === 'latest' ? null : Number(yearMode));
+  el.recSub.textContent =
+    yearMode === 'latest'
+      ? `省位次 ${fmtInt(result.rankProv)} 名，按各专业组最近一年的投档位次对照`
+      : `省位次 ${fmtInt(result.rankProv)} 名，只看 ${yearMode} 年的投档线`;
   const perYear = Object.keys(data.tables)
     .sort()
     .reverse()
     .map((y) => `${y} 年 ${data.tables[y].rows.length} 组`)
     .join(' · ');
   el.recNote.textContent =
-    `已收录：${perYear}；参与排序 ${rec.total} 个专业组（只用最近两年有数据的组），按各组最新一年位次排。` +
+    (yearMode === 'latest'
+      ? `已收录：${perYear}；参与排序 ${rec.total} 个专业组（只用最近两年有数据的组），按各组最新一年位次排。`
+      : `${yearMode} 年有数据的 ${rec.total} 个专业组参与排序，其余年份的分数只在卡片里做参考。`) +
     '投档线是专业组最低分，组内热门专业实际要更高；数据仅供定位，填报前务必核对官方计划本。';
   fillRecList(el.recReach, rec.reach, result, 'reach');
   fillRecList(el.recSafe, rec.safe, result, 'safe');
@@ -250,6 +262,42 @@ function fillRecList(ul, items, result, kind) {
         <div class="m">${g.latestYear} 投档 ${g.score} 分 · 第 ${fmtInt(g.rank)} 名</div>
         <div class="d ${kind === 'reach' ? 'neg' : 'pos'}">位次差 ${dRank > 0 ? '+' : ''}${fmtInt(dRank)} · 分数差 ${dScore > 0 ? '+' : ''}${dScore}</div>
         <div class="h">往年 ${other}</div>
+      </li>`;
+    })
+    .join('');
+}
+
+function renderMajors(result) {
+  const data = MAJORS;
+  if (!data) {
+    el.majorSub.textContent = '尚未录入专业分数据';
+    el.majorReach.innerHTML = '<li class="rec-empty">无数据</li>';
+    el.majorSafe.innerHTML = '<li class="rec-empty">无数据</li>';
+    return;
+  }
+  const year = Math.max(...Object.keys(data).map(Number));
+  const rec = recommendMajors(result.rankProv, data, 5, year);
+  const schools = (rec.schools || []).join('、') || '—';
+  el.majorSub.textContent = `省位次 ${fmtInt(result.rankProv)} 名，对照 ${year} 年各专业录取分（已录入：${schools}）`;
+  el.majorNote.textContent =
+    `共 ${rec.total} 个专业，按 ${year} 年各专业最低位次排序；` +
+    '专业分来自各校招生官网，同组内不同专业分差可达几十分，务必看单专业分数。';
+  fillMajorList(el.majorReach, rec.reach, result, 'reach');
+  fillMajorList(el.majorSafe, rec.safe, result, 'safe');
+}
+
+function fillMajorList(ul, items, result, kind) {
+  if (!items.length) {
+    ul.innerHTML = '<li class="rec-empty">这一段没有已录入的专业</li>';
+    return;
+  }
+  ul.innerHTML = items
+    .map((m) => {
+      const dRank = m.rank - result.rankProv;
+      return `<li>
+        <div class="n">${escapeHtml(m.major)}</div>
+        <div class="m">${escapeHtml(m.school)} · 组${m.group} · ${m.score} 分 / 第 ${fmtInt(m.rank)} 名</div>
+        <div class="d ${kind === 'reach' ? 'neg' : 'pos'}">位次差 ${dRank > 0 ? '+' : ''}${fmtInt(dRank)}</div>
       </li>`;
     })
     .join('');
@@ -583,6 +631,14 @@ el.btn.add.addEventListener('click', addCurrent);
 el.btn.copy.addEventListener('click', copyResult);
 el.btn.export.addEventListener('click', exportImage);
 el.btn.reset.addEventListener('click', resetAll);
+el.yearSeg.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-year]');
+  if (!btn) return;
+  yearMode = btn.dataset.year;
+  [...el.yearSeg.querySelectorAll('button')].forEach((b) => b.classList.toggle('on', b === btn));
+  render();
+});
+
 el.btn.clear.addEventListener('click', () => {
   compare = [];
   saveStore(STORE.compare, compare);

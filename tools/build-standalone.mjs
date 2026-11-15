@@ -9,7 +9,7 @@ const dir = new URL('../docs/', import.meta.url);
 let html = fs.readFileSync(new URL('index.html', dir), 'utf8');
 const css = fs.readFileSync(new URL('styles.css', dir), 'utf8');
 
-const files = ['core.js', 'admissions.js', 'chart.js', 'export.js', 'ui.js'];
+const files = ['core.js', 'admissions.js', 'majors.js', 'chart.js', 'export.js', 'ui.js'];
 const sources = files.map((f) => fs.readFileSync(new URL(`js/${f}`, dir), 'utf8'));
 
 html = html.replace(
@@ -17,7 +17,7 @@ html = html.replace(
   () => `<style>\n${css}\n</style>`
 );
 
-const tagRe = /\s*<script src="\.\/js\/(core|admissions|chart|export|ui)\.js(\?v=[^"]*)?" defer><\/script>/g;
+const tagRe = /\s*<script src="\.\/js\/(core|admissions|majors|chart|export|ui)\.js(\?v=[^"]*)?" defer><\/script>/g;
 let i = 0;
 html = html.replace(tagRe, () => `\n<script>\n${sources[i++]}\n</script>`);
 

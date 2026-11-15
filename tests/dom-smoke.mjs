@@ -86,10 +86,10 @@ const run = (name) =>
 if (STANDALONE) {
   // 单文件版：按顺序执行内联脚本
   const inline = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
-  if (inline.length !== 7) throw new Error(`内联脚本数量不对：${inline.length}`);
+  if (inline.length !== 8) throw new Error(`内联脚本数量不对：${inline.length}`);
   inline.forEach((code, i) => vm.runInThisContext(code, { filename: `inline-${i}.js` }));
 } else {
-  ['core.js', 'admissions.js', 'chart.js', 'export.js', 'ui.js'].forEach(run);
+  ['core.js', 'admissions.js', 'majors.js', 'chart.js', 'export.js', 'ui.js'].forEach(run);
 }
 
 let failed = 0;
@@ -119,6 +119,9 @@ eq('冲的数量', ($('rec-reach').innerHTML.match(/<li>/g) || []).length, 5);
 eq('稳的数量', ($('rec-safe').innerHTML.match(/<li>/g) || []).length, 5);
 has('冲里有福建农林大学', $('rec-reach').innerHTML, '福建农林大学');
 has('稳里有福建医科大学', $('rec-safe').innerHTML, '福建医科大学');
+eq('专业冲的数量', ($('major-reach').innerHTML.match(/<li>/g) || []).length, 5);
+has('专业里有福州大学', $('major-reach').innerHTML, '福州大学');
+has('专业副标题', $('major-sub').textContent, '福州大学');
 
 console.log('分数/位次联动');
 {

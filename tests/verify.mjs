@@ -12,8 +12,9 @@ const load = (name) =>
   vm.runInThisContext(fs.readFileSync(new URL(`../docs/js/${name}`, import.meta.url), 'utf8'), { filename: name });
 load('core.js');
 load('admissions.js');
+load('majors.js');
 
-const { makeModel, convert, lookupTable, recommendGroups, buildRecords, ADMISSIONS, DEFAULT_PARAMS } = globalThis.SC;
+const { makeModel, convert, lookupTable, recommendGroups, recommendMajors, buildRecords, ADMISSIONS, MAJORS, DEFAULT_PARAMS } = globalThis.SC;
 
 let failed = 0;
 let passed = 0;
@@ -188,6 +189,25 @@ console.log('判定');
     }
     eq(`${y} 年表有序`, ok, true);
   }
+}
+
+/* ---- 10. 年份切换与专业推荐 ---- */
+{
+  const me = convert({ score: 500, rank: 3100 });
+  const y2026 = recommendGroups(me.rankProv, ADMISSIONS, 5, 2026);
+  const y2025 = recommendGroups(me.rankProv, ADMISSIONS, 5, 2025);
+  const y2024 = recommendGroups(me.rankProv, ADMISSIONS, 5, 2024);
+  eq('2026 池子 217', y2026.total, 217);
+  eq('2025 池子 128', y2025.total, 128);
+  eq('2024 池子 104', y2024.total, 104);
+  eq('2025 全部来自 2025 表', y2025.reach.every((g) => g.years[2025]), true);
+
+  const mj = recommendMajors(me.rankProv, MAJORS);
+  eq('福大专业 119 个', mj.total, 119);
+  eq('专业冲 5 个', mj.reach.length, 5);
+  eq('福大全在冲档', mj.safe.length, 0);
+  near('最接近的专业位次', mj.reach[0].rank, 24364, 1);
+  eq('专业按位次降序', mj.reach.every((m, i) => i === 0 || mj.reach[i - 1].rank >= m.rank), true);
 }
 
 console.log(`\n通过 ${passed}，失败 ${failed}`);

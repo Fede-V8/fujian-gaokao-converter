@@ -145,7 +145,12 @@
         <h2>能上 / 能冲</h2>
         <p class="card-sub" id="rec-sub"></p>
       </div>
-      <span class="pill">2025 投档线</span>
+      <div class="seg" id="year-seg" role="group" aria-label="切换年份">
+        <button type="button" data-year="latest" class="on">最新</button>
+        <button type="button" data-year="2026">2026</button>
+        <button type="button" data-year="2025">2025</button>
+        <button type="button" data-year="2024">2024</button>
+      </div>
     </div>
     <div class="rec-grid">
       <div class="rec-col reach">
@@ -160,7 +165,29 @@
     <p class="rec-note" id="rec-note"></p>
   </section>
 
-  <!-- ⑤ 多人对比 -->
+  <!-- ⑤ 专业推荐 -->
+  <section class="card" id="card-major">
+    <div class="card-head row">
+      <div>
+        <h2>专业推荐</h2>
+        <p class="card-sub" id="major-sub"></p>
+      </div>
+      <span class="pill" id="major-pill">2025 专业分</span>
+    </div>
+    <div class="rec-grid">
+      <div class="rec-col reach">
+        <h3>冲 <small>比你高一点</small></h3>
+        <ol id="major-reach" class="rec-list"></ol>
+      </div>
+      <div class="rec-col safe">
+        <h3>稳 <small>比你低一点</small></h3>
+        <ol id="major-safe" class="rec-list"></ol>
+      </div>
+    </div>
+    <p class="rec-note" id="major-note"></p>
+  </section>
+
+  <!-- ⑥ 多人对比 -->
   <section class="card" id="card-compare">
     <div class="card-head row">
       <div>
@@ -225,6 +252,7 @@
 
 <script src="./js/core.js?v=20261115a" defer></script>
 <script src="./js/admissions.js?v=20261115a" defer></script>
+<script src="./js/majors.js?v=20261115a" defer></script>
 <script src="./js/chart.js?v=20261115a" defer></script>
 <script src="./js/export.js?v=20261115a" defer></script>
 <script src="./js/ui.js?v=20261115a" defer></script>
