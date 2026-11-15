@@ -294,9 +294,10 @@ function fillMajorList(ul, items, result, kind) {
   ul.innerHTML = items
     .map((m) => {
       const dRank = m.rank - result.rankProv;
+      const grp = m.group ? ` · 组${m.group}` : '';
       return `<li>
         <div class="n">${escapeHtml(m.major)}</div>
-        <div class="m">${escapeHtml(m.school)} · 组${m.group} · ${m.score} 分 / 第 ${fmtInt(m.rank)} 名</div>
+        <div class="m">${escapeHtml(m.school)}${grp} · ${m.score} 分 / 第 ${fmtInt(m.rank)} 名</div>
         <div class="d ${kind === 'reach' ? 'neg' : 'pos'}">位次差 ${dRank > 0 ? '+' : ''}${fmtInt(dRank)}</div>
       </li>`;
     })

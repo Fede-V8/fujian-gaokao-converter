@@ -203,10 +203,10 @@ console.log('判定');
   eq('2025 全部来自 2025 表', y2025.reach.every((g) => g.years[2025]), true);
 
   const mj = recommendMajors(me.rankProv, MAJORS);
-  eq('福大专业 119 个', mj.total, 119);
+  eq('专业 158 个', mj.total, 158);
   eq('专业冲 5 个', mj.reach.length, 5);
-  eq('福大全在冲档', mj.safe.length, 0);
-  near('最接近的专业位次', mj.reach[0].rank, 24364, 1);
+  eq('稳档有 5 个', mj.safe.length, 5);
+  near('冲最接近的专业位次', mj.reach[0].rank, 46854, 1);
   eq('专业按位次降序', mj.reach.every((m, i) => i === 0 || mj.reach[i - 1].rank >= m.rank), true);
 }
 
